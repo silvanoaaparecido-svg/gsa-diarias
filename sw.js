@@ -45,8 +45,8 @@ self.addEventListener('message', e => {
     setTimeout(() => {
       self.registration.showNotification(titulo, {
         body: corpo,
-        icon: './icon-192.png',
-        badge: './icon-192.png',
+        icon: './ícone-192.png',
+        badge: './ícone-192.png',
         vibrate: [200, 100, 200],
         tag: 'gsa-ponto',
         renotify: true

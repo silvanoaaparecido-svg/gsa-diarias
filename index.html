@@ -729,7 +729,7 @@ function agendarNotificacoes(manha,tarde,fim){
       // Fallback: setTimeout simples (só funciona com app aberto)
       setTimeout(function(){
         if(Notification.permission==='granted'){
-          try{new Notification(h.titulo,{body:h.corpo,icon:'./icon-192.png'});}catch(e){}
+          try{new Notification(h.titulo,{body:h.corpo,icon:'./ícone-192.png'});}catch(e){}
         }
       },ms);
     }
