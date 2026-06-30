@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#B91C1C">
+<title>GSA — Controle de Obras</title>
+<style>
+:root{
+  --verm:#B91C1C;--verm2:#DC2626;--ouro:#F59E0B;--verde:#15803D;--amar:#D97706;
+  --azul:#1E40AF;--roxo:#7C3AED;--bg:#F8FAFC;--card:#fff;--borda:#E2E8F0;
+  --txt:#0F172A;--txt2:#64748B;--inp:#F1F5F9;--r:12px;
+}
+[data-theme="dark"]{--bg:#080810;--card:#111118;--borda:#1E293B;--txt:#F1F5F9;--txt2:#94A3B8;--inp:#1E293B;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);padding-bottom:80px;transition:background .2s}
+
+/* LOGIN */
+#tela-login{position:fixed;inset:0;background:linear-gradient(135deg,#7f1d1d,#B91C1C);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+#tela-login.oculto{display:none}
+.lg-logo{font-size:56px;margin-bottom:8px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.lg-titulo{color:#FFD700;font-size:26px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
+.lg-sub{color:rgba(255,255,255,.65);font-size:13px;margin-bottom:30px;text-align:center}
+.lg-card{background:#fff;border-radius:18px;padding:24px 20px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.lg-lbl{display:block;font-size:11px;font-weight:700;color:#64748B;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.lg-inp{width:100%;padding:13px;border:1.5px solid #E2E8F0;border-radius:9px;font-size:15px;margin-bottom:14px;color:#0F172A;background:#F8FAFC;-webkit-appearance:none;outline:none}
+.lg-inp:focus{border-color:#B91C1C}
+.lg-btn{width:100%;padding:14px;background:#B91C1C;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
+.lg-erro{color:#DC2626;font-size:13px;text-align:center;margin-top:9px;font-weight:600;min-height:18px}
+.lg-rod{color:rgba(255,255,255,.4);font-size:11px;margin-top:22px}
+
+/* APP */
+#app{display:none}#app.on{display:block}
+
+/* HEADER */
+.hdr{background:var(--verm);padding:12px 14px 9px;position:sticky;top:0;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hdr-titulo{color:#FFD700;font-size:15px;font-weight:800}
+.hdr-btns{display:flex;gap:5px}
+.hdr-btn{background:rgba(255,255,255,.15);border:none;border-radius:20px;padding:5px 10px;color:#fff;font-size:13px;cursor:pointer;-webkit-appearance:none}
+.tabs{display:flex;gap:4px;overflow-x:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:7px 12px;border:none;border-radius:8px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.65);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;-webkit-appearance:none}
+.tab.on{background:#fff;color:var(--verm);font-weight:700}
+
+/* WRAP */
+.wrap{padding:12px}
+
+/* CARDS RESUMO TOPO */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.res-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--r);padding:11px 13px}
+.res-lbl{font-size:10px;color:var(--txt2);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.res-val{font-size:17px;font-weight:700}
+.res-val.verde{color:var(--verde)}.res-val.verm{color:var(--verm)}
+.res-val.amar{color:var(--amar)}.res-val.azul{color:var(--azul)}
+.res-val.roxo{color:var(--roxo)}
+
+/* OBRA CARD */
+.obra-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.obra-hdr{padding:13px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border-left:4px solid var(--verm)}
+.obra-nome{font-size:14px;font-weight:700}
+.obra-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+.obra-right{text-align:right;flex-shrink:0;margin-left:8px}
+.obra-total{font-size:15px;font-weight:800;color:var(--verde)}
+.obra-sub2{font-size:10px;color:var(--txt2)}
+.seta{font-size:16px;color:var(--txt2);transition:transform .2s;display:inline-block;margin-left:4px}
+.aberto-body .seta{transform:rotate(90deg)}
+
+/* SEÇÕES */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;padding:8px 13px;background:var(--inp);border-top:1px solid var(--borda);border-bottom:1px solid var(--borda)}
+.sec-titulo{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.04em}
+.sec-btn{background:var(--verm);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;-webkit-appearance:none}
+.sec-btn.verde{background:var(--verde)}
+.sec-btn.roxo{background:var(--roxo)}
+
+/* MINI RESUMO OBRA */
+.obra-resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--borda)}
+.obra-res-item{padding:10px 8px;text-align:center;border-right:1px solid var(--borda)}
+.obra-res-item:last-child{border:none}
+.obra-res-lbl{font-size:9px;color:var(--txt2);text-transform:uppercase;font-weight:700;margin-bottom:3px}
+.obra-res-val{font-size:13px;font-weight:700}
+
+/* PROGRESSO */
+.prog-wrap{padding:9px 13px;border-bottom:1px solid var(--borda);background:var(--inp)}
+.prog-bar{background:var(--borda);border-radius:4px;height:7px;margin:5px 0 3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .4s}
+
+/* LANÇAMENTOS */
+.lanc-item{padding:9px 13px;border-bottom:1px solid var(--borda);display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:start}
+.lanc-item:last-child{border:none}
+.lanc-desc{font-size:12px;font-weight:600;color:var(--txt)}
+.lanc-val{font-size:13px;font-weight:700;color:var(--txt);text-align:right}
+.lanc-info{font-size:10px;color:var(--txt2);grid-column:1}
+.lanc-tags{display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.tag{padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.tag.pago{background:#DCFCE7;color:#15803D}
+.tag.aberto{background:#FEE2E2;color:#B91C1C}
+.tag.vencer{background:#FEF3C7;color:#D97706}
+.del-btn{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:13px;padding:0 2px;line-height:1}
+.sec-total{display:flex;justify-content:space-between;padding:9px 13px;font-size:12px;font-weight:700;border-top:1px solid var(--borda);background:var(--inp)}
+.vazia{padding:14px;text-align:center;color:var(--txt2);font-size:12px}
+
+/* PRESTADORES CARD */
+.prest-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--r);margin-bottom:9px;overflow:hidden}
+.prest-hdr{padding:11px 13px;display:flex;align-items:flex-start;cursor:pointer;border-left:4px solid var(--roxo);gap:8px}
+.prest-nome{font-size:13px;font-weight:700}
+.prest-tipo{font-size:10px;color:var(--txt2);margin-top:2px}
+.prest-total{font-size:14px;font-weight:800;color:var(--roxo);text-align:right}
+
+/* PAGAMENTOS PRESTADOR */
+.pag-item{display:grid;grid-template-columns:90px 1fr auto auto;gap:4px 8px;padding:8px 13px;border-bottom:1px solid var(--borda);align-items:center;font-size:12px}
+.pag-item:last-child{border:none}
+.pag-data{color:var(--txt2);font-size:11px}
+.pag-forma{color:var(--txt);font-weight:500}
+.pag-val{font-weight:700;color:var(--txt);text-align:right}
+
+/* CADASTRO PRESTADORES (aba) */
+.prest-lista-item{background:var(--card);border:1px solid var(--borda);border-radius:10px;padding:11px 13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.prest-lista-nome{font-size:13px;font-weight:700}
+.prest-lista-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+.prest-lista-acoes{display:flex;gap:6px;align-items:center}
+
+/* MODAIS */
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;justify-content:center}
+.mov.on{display:flex}
+.mod{background:var(--card);border-radius:20px 20px 0 0;padding:18px 18px 40px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.mh{width:36px;height:4px;background:var(--borda);border-radius:2px;margin:0 auto 16px}
+.mod h3{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--verm)}
+.mod h3.roxo{color:var(--roxo)}
+.mod label{display:block;font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.mod input,.mod select,.mod textarea{width:100%;padding:11px 13px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;margin-bottom:11px;color:var(--txt);background:var(--inp);-webkit-appearance:none;outline:none;font-family:inherit}
+.mod input:focus,.mod select:focus{border-color:var(--verm)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mbs{display:flex;gap:8px;margin-top:4px}
+.bcl{flex:1;padding:12px;border:1.5px solid var(--borda);border-radius:8px;background:var(--inp);color:var(--txt2);font-size:14px;font-weight:600;cursor:pointer;-webkit-appearance:none}
+.bsv{flex:2;padding:12px;border:none;border-radius:8px;background:var(--verm);color:#fff;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none}
+.bsv.roxo{background:var(--roxo)}
+
+/* BTN NOVA OBRA */
+.btn-nova{width:100%;padding:13px;background:var(--verm);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(185,28,28,.25)}
+.btn-nova.roxo{background:var(--roxo);box-shadow:0 4px 14px rgba(124,58,237,.25)}
+
+/* FAB */
+.fab{position:fixed;bottom:18px;right:14px;background:var(--verm);color:#fff;border:none;border-radius:50px;padding:14px 18px;font-size:14px;font-weight:700;cursor:pointer;z-index:150;box-shadow:0 4px 16px rgba(185,28,28,.4);-webkit-appearance:none}
+
+/* TOAST */
+.tst{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(14px);background:#0F172A;color:#fff;padding:9px 17px;border-radius:50px;font-size:13px;opacity:0;transition:all .25s;z-index:300;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center}
+.tst.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="tela-login">
+  <div class="lg-logo">🏗️</div>
+  <div class="lg-titulo">GSA OBRAS</div>
+  <div class="lg-sub">Controle Financeiro de Obras</div>
+  <div class="lg-card">
+    <label class="lg-lbl">Senha de acesso</label>
+    <input class="lg-inp" id="isenha" type="password" placeholder="Digite a senha">
+    <button class="lg-btn" data-action="login">ENTRAR</button>
+    <div class="lg-erro" id="lg-erro"></div>
+  </div>
+  <div class="lg-rod">GSA Construções © 2026 &nbsp;•&nbsp; v2.0</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="hdr-titulo">🏗️ GSA Obras</div>
+      <div class="hdr-btns">
+        <button class="hdr-btn" data-action="toggle-dark">🌙</button>
+      <div id="drive-badge" class="hdr-btn" data-action="abrir-drive" style="cursor:pointer;font-size:11px">☁️ Drive</div>
+        <button class="hdr-btn" data-action="abrir-bkp">💾</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-action="tab" data-p="0">🏠 Obras</button>
+      <button class="tab" data-action="tab" data-p="1">👷 Prestadores</button>
+      <button class="tab" data-action="tab" data-p="2">📊 Resumo Geral</button>
+    </div>
+  </div>
+
+  <div class="wrap" id="main-wrap"></div>
+
+  <!-- Modal nova obra -->
+  <div class="mov" id="modal-obra"><div class="mod">
+    <div class="mh"></div><h3>🏗️ Nova Obra</h3>
+    <label>Nome da obra</label>
+    <input id="o-nome" type="text" placeholder="Ex: Residência Rodry — Obra O6" autocomplete="off">
+    <label>Cliente / Proprietário</label>
+    <input id="o-cliente" type="text" placeholder="Ex: Rodrigo Silva" autocomplete="off">
+    <label>Endereço (opcional)</label>
+    <input id="o-end" type="text" placeholder="Ex: Rua das Flores, 123" autocomplete="off">
+    <label>Orçamento total (R$)</label>
+    <input id="o-orc" type="number" placeholder="Ex: 250000" inputmode="decimal">
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-obra">Cancelar</button>
+      <button class="bsv" data-action="salvar-obra">Salvar ✓</button>
+    </div>
+  </div></div>
+
+  <!-- Modal novo material -->
+  <div class="mov" id="modal-mat"><div class="mod">
+    <div class="mh"></div><h3>📦 Lançar Compra de Material</h3>
+    <label>Data da compra</label>
+    <input id="m-data" type="date">
+    <label>Descrição</label>
+    <input id="m-desc" type="text" placeholder="Ex: 50 sacos de cimento ITAÚ" autocomplete="off">
+    <label>Fornecedor</label>
+    <input id="m-forn" type="text" placeholder="Ex: Rei do Cimento" autocomplete="off">
+    <div class="grid2">
+      <div><label>Valor Total (R$)</label><input id="m-val" type="number" placeholder="0,00" inputmode="decimal"></div>
+      <div><label>Status</label>
+        <select id="m-status">
+          <option value="pago">✅ Pago</option>
+          <option value="aberto">🔴 Em aberto</option>
+          <option value="vencer">🟡 A vencer</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div><label>Vencimento boleto</label><input id="m-venc" type="date"></div>
+      <div><label>Forma pagamento</label>
+        <select id="m-forma">
+          <option>PIX</option><option>Boleto</option><option>Dinheiro</option>
+          <option>Cartão</option><option>Transferência</option><option>A prazo</option>
+        </select>
+      </div>
+    </div>
+    <!-- PARCELAMENTO -->
+    <div style="border:1.5px dashed var(--borda);border-radius:8px;padding:11px;margin-bottom:11px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label style="margin:0;font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.04em">📅 Pagamento Parcelado</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt);cursor:pointer;margin:0">
+          <input type="checkbox" id="m-parcelado" style="width:16px;height:16px;accent-color:var(--verm)"> Ativar
+        </label>
+      </div>
+      <div id="parcelas-wrap" style="display:none">
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <div style="flex:1"><label style="display:block;font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:3px;text-transform:uppercase">Nº de Parcelas</label>
+          <select id="m-nparcelas" style="width:100%;padding:9px;border:1.5px solid var(--borda);border-radius:7px;font-size:13px;background:var(--inp);color:var(--txt);-webkit-appearance:none">
+            <option value="2">2x</option><option value="3">3x</option><option value="4">4x</option>
+            <option value="5">5x</option><option value="6">6x</option><option value="8">8x</option><option value="10">10x</option><option value="12">12x</option>
+          </select></div>
+          <div style="flex:none;align-self:flex-end"><button type="button" onclick="gerarParcelas()" style="padding:9px 13px;background:var(--verm);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">Gerar</button></div>
+        </div>
+        <div id="parcelas-lista" style="display:flex;flex-direction:column;gap:5px"></div>
+      </div>
+    </div>
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-mat">Cancelar</button>
+      <button class="bsv" data-action="salvar-mat">Lançar ✓</button>
+    </div>
+  </div></div>
+
+  <!-- Modal pagamento prestador -->
+  <div class="mov" id="modal-pag"><div class="mod">
+    <div class="mh"></div><h3 class="roxo">👷 Lançar Pagamento</h3>
+    <div id="pag-prest-info" style="background:var(--inp);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--roxo)"></div>
+    <label>Descrição do serviço</label>
+    <input id="pag-desc" type="text" placeholder="Ex: Pagamento quinzena — alvenaria" autocomplete="off">
+    <div class="grid2">
+      <div><label>Data do pagamento</label><input id="pag-data" type="date"></div>
+      <div><label>Valor (R$)</label><input id="pag-val" type="number" placeholder="0,00" inputmode="decimal"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Forma de pagamento</label>
+        <select id="pag-forma">
+          <option>PIX</option><option>Dinheiro</option><option>Transferência</option>
+          <option>Cheque</option><option>Boleto</option><option>Outro</option>
+        </select>
+      </div>
+      <div><label>Status</label>
+        <select id="pag-status">
+          <option value="pago">✅ Pago</option>
+          <option value="aberto">🔴 A pagar</option>
+          <option value="vencer">🟡 A vencer</option>
+        </select>
+      </div>
+    </div>
+    <label>Obra vinculada</label>
+    <select id="pag-obra"></select>
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-pag">Cancelar</button>
+      <button class="bsv roxo" data-action="salvar-pag">Lançar ✓</button>
+    </div>
+  </div></div>
+
+  <!-- Modal novo prestador -->
+  <div class="mov" id="modal-prest"><div class="mod">
+    <div class="mh"></div><h3 class="roxo">👷 Cadastrar Prestador</h3>
+    <label>Nome / Razão Social</label>
+    <input id="pr-nome" type="text" placeholder="Ex: Serralheria Silva" autocomplete="off">
+    <label>Tipo de serviço</label>
+    <input id="pr-tipo" type="text" placeholder="Ex: Serralheria, Elétrica, Mão de obra geral..." autocomplete="off">
+    <label>Contato / Telefone (opcional)</label>
+    <input id="pr-tel" type="tel" placeholder="Ex: (65) 99999-9999">
+    <label>Cor de identificação</label>
+    <select id="pr-cor">
+      <option value="roxo">🟣 Roxo</option>
+      <option value="azul">🔵 Azul</option>
+      <option value="verde">🟢 Verde</option>
+      <option value="verm">🔴 Vermelho</option>
+      <option value="amar">🟡 Amarelo</option>
+    </select>
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-prest">Cancelar</button>
+      <button class="bsv roxo" data-action="salvar-prest">Cadastrar ✓</button>
+    </div>
+  </div></div>
+
+  <!-- Modal backup -->
+  <div class="mov" id="modal-bkp"><div class="mod">
+    <div class="mh"></div><h3>💾 Backup</h3>
+    <button class="bsv" data-action="exp-json" style="width:100%;margin-bottom:9px">⬇️ Exportar backup (.json)</button>
+    <button class="bcl" data-action="imp-json" style="width:100%;margin-bottom:9px">📥 Importar backup</button>
+    <input type="file" id="inp-json" accept=".json" style="display:none">
+    <button class="bcl" data-action="fechar-bkp" style="width:100%">Fechar</button>
+  </div></div>
+
+  <!-- Modal editar obra -->
+  <div class="mov" id="modal-edit-obra"><div class="mod">
+    <div class="mh"></div><h3>✏️ Editar Obra</h3>
+    <label>Nome da obra</label>
+    <input id="eo-nome" type="text" placeholder="Ex: Residência Rodry — Obra O6" autocomplete="off">
+    <label>Cliente / Proprietário</label>
+    <input id="eo-cliente" type="text" placeholder="Ex: Rodrigo Silva" autocomplete="off">
+    <label>Endereço (opcional)</label>
+    <input id="eo-end" type="text" placeholder="Ex: Rua das Flores, 123" autocomplete="off">
+    <label>Orçamento total (R$)</label>
+    <input id="eo-orc" type="number" placeholder="Ex: 250000" inputmode="decimal">
+    <label>Status da obra</label>
+    <select id="eo-status" style="width:100%;padding:11px 13px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;margin-bottom:12px;color:var(--txt);background:var(--inp);-webkit-appearance:none">
+      <option value="andamento">🔨 Em andamento</option>
+      <option value="concluida">✅ Concluída</option>
+      <option value="pausada">⏸️ Pausada</option>
+    </select>
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-edit-obra">Cancelar</button>
+      <button class="bsv" data-action="salvar-edit-obra">Salvar ✓</button>
+    </div>
+  </div></div>
+
+  <!-- Modal editar status material -->
+  <div class="mov" id="modal-edit-mat"><div class="mod">
+    <div class="mh"></div><h3>✏️ Editar Lançamento</h3>
+    <div id="edit-mat-info" style="background:var(--inp);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--txt2);line-height:1.5"></div>
+    <label>Status do Pagamento</label>
+    <select id="edit-status" style="width:100%;padding:11px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;margin-bottom:12px;color:var(--txt);background:var(--inp);-webkit-appearance:none">
+      <option value="pago">✅ Pago</option>
+      <option value="aberto">🔴 Em aberto</option>
+      <option value="vencer">🟡 A vencer</option>
+    </select>
+    <label>Data de Pagamento (se pago)</label>
+    <input id="edit-datapag" type="date" style="width:100%;padding:11px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;margin-bottom:12px;color:var(--txt);background:var(--inp);-webkit-appearance:none">
+    <label>Vencimento Boleto</label>
+    <input id="edit-venc" type="date" style="width:100%;padding:11px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;margin-bottom:12px;color:var(--txt);background:var(--inp);-webkit-appearance:none">
+    <label>Forma de Pagamento</label>
+    <select id="edit-forma" style="width:100%;padding:11px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;margin-bottom:12px;color:var(--txt);background:var(--inp);-webkit-appearance:none">
+      <option>PIX</option><option>Boleto</option><option>Dinheiro</option>
+      <option>Cartão</option><option>Transferência</option><option>A prazo</option>
+    </select>
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-edit-mat">Cancelar</button>
+      <button class="bsv" data-action="salvar-edit-mat">Salvar ✓</button>
+    </div>
+  </div></div>
+
+  <!-- Modal editar prestador -->
+  <div class="mov" id="modal-edit-prest"><div class="mod">
+    <div class="mh"></div><h3 class="roxo">✏️ Editar Prestador</h3>
+    <label>Nome / Razão Social</label>
+    <input id="ep-nome" type="text" placeholder="Ex: Serralheria Silva" autocomplete="off">
+    <label>Tipo de serviço</label>
+    <input id="ep-tipo" type="text" placeholder="Ex: Serralheria, Elétrica, Mão de obra geral..." autocomplete="off">
+    <label>Contato / Telefone (opcional)</label>
+    <input id="ep-tel" type="tel" placeholder="Ex: (65) 99999-9999">
+    <label>Cor de identificação</label>
+    <select id="ep-cor" style="width:100%;padding:11px 13px;border:1.5px solid var(--borda);border-radius:8px;font-size:14px;margin-bottom:12px;color:var(--txt);background:var(--inp);-webkit-appearance:none">
+      <option value="roxo">🟣 Roxo</option>
+      <option value="azul">🔵 Azul</option>
+      <option value="verde">🟢 Verde</option>
+      <option value="verm">🔴 Vermelho</option>
+      <option value="amar">🟡 Amarelo</option>
+    </select>
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-edit-prest">Cancelar</button>
+      <button class="bsv roxo" data-action="salvar-edit-prest">Salvar ✓</button>
+    </div>
+  </div></div>
+
+  <!-- Modal editar pagamento mão de obra -->
+  <div class="mov" id="modal-edit-pag"><div class="mod">
+    <div class="mh"></div><h3 class="roxo">✏️ Editar Pagamento</h3>
+    <div id="edit-pag-info" style="background:var(--inp);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--roxo);font-weight:700;line-height:1.5"></div>
+    <label>Descrição do serviço</label>
+    <input id="ep-desc" type="text" placeholder="Ex: Pagamento quinzena — alvenaria" autocomplete="off">
+    <div class="grid2">
+      <div><label>Data do pagamento</label><input id="ep-data" type="date"></div>
+      <div><label>Valor (R$)</label><input id="ep-val" type="number" placeholder="0,00" inputmode="decimal"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Forma de pagamento</label>
+        <select id="ep-forma">
+          <option>PIX</option><option>Dinheiro</option><option>Transferência</option>
+          <option>Cheque</option><option>Boleto</option><option>Outro</option>
+        </select>
+      </div>
+      <div><label>Status</label>
+        <select id="ep-status">
+          <option value="pago">✅ Pago</option>
+          <option value="aberto">🔴 A pagar</option>
+          <option value="vencer">🟡 A vencer</option>
+        </select>
+      </div>
+    </div>
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-edit-pag">Cancelar</button>
+      <button class="bsv roxo" data-action="salvar-edit-pag">Salvar ✓</button>
+    </div>
+  </div></div>
+
+
+  <!-- Modal Google Drive -->
+  <div class="mov" id="modal-drive"><div class="mod">
+    <div class="mh"></div><h3>☁️ Google Drive</h3>
+    <div id="drive-modal-body"></div>
+  </div></div>
+
+  <!-- Modal configurar Client ID -->
+  <div class="mov" id="modal-config-drive"><div class="mod">
+    <div class="mh"></div><h3>⚙️ Configurar Google Drive</h3>
+    <div style="background:var(--inp);border-radius:8px;padding:11px 13px;margin-bottom:13px;font-size:12px;color:var(--txt2);line-height:1.8">
+      <b style="color:var(--verm)">Passo 1:</b> Acesse <a href="https://console.cloud.google.com" target="_blank" style="color:#4285F4">console.cloud.google.com</a><br>
+      <b style="color:var(--verm)">Passo 2:</b> No Client ID já criado, adicione a origem:<br>
+      <code style="background:var(--borda);padding:2px 6px;border-radius:4px;font-size:11px">https://silvanoaaparecido-svg.github.io</code><br>
+      <b style="color:var(--verm)">Passo 3:</b> Cole o Client ID abaixo
+    </div>
+    <label>Client ID</label>
+    <input id="inp-client-id" type="text" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+    <div class="mbs">
+      <button class="bcl" data-action="fechar-config-drive">Cancelar</button>
+      <button class="bsv" data-action="salvar-config-drive">Salvar e Conectar</button>
+    </div>
+  </div></div>
+
+  <div class="tst" id="toast"></div>
+</div>
+
+<script>
+// ============================================================
+// GSA OBRAS v2.0
+// ============================================================
+var SENHA='GSA2026', CHAVE='gsa_obras_v2';
+var TAB=0, DADOS={obras:[], prestadores:[]};
+var CTX={obraIdx:-1, prestIdx:-1}; // contexto para modais
+
+// ===== AUTH =====
+function login(){
+  var s=document.getElementById('isenha').value.trim();
+  if(s===SENHA){
+    localStorage.setItem('gsa_obras_auth2','1');
+    document.getElementById('tela-login').className='oculto';
+    document.getElementById('app').className='on';
+    carregar();render();
+  } else {
+    document.getElementById('lg-erro').textContent='Senha incorreta.';
+    document.getElementById('isenha').value='';
+  }
+}
+
+// ===== DARK =====
+function initDark(){document.documentElement.setAttribute('data-theme',localStorage.getItem('obras_dark')==='1'?'dark':'light');}
+function toggleDark(){var c=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',c?'light':'dark');localStorage.setItem('obras_dark',c?'0':'1');}
+
+// ===== DADOS =====
+function carregar(){
+  try{var s=localStorage.getItem(CHAVE);if(s)DADOS=JSON.parse(s);}catch(e){}
+  if(!DADOS.obras)DADOS.obras=[];
+  if(!DADOS.prestadores)DADOS.prestadores=[];
+  if(!DADOS.obras.length)carregarExemplo();
+}
+
+function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(DADOS));}catch(e){}}
+
+function carregarExemplo(){
+  // Prestadores da planilha
+  DADOS.prestadores=[
+    {id:1,nome:'GSA',tipo:'Mão de obra geral / Construtora',tel:'(65) 99632-1773',cor:'verm'},
+    {id:2,nome:'Serralheria Silva',tipo:'Serralheria / Estruturas metálicas',tel:'',cor:'azul'},
+    {id:3,nome:'Manoel',tipo:'Mão de obra geral',tel:'',cor:'verde'},
+    {id:4,nome:'Lucas (Eletricista) / Eletrosantana',tipo:'Elétrica',tel:'',cor:'amar'},
+  ];
+
+  // Pagamentos da planilha (extraídos exatamente)
+  var pagGSA=[
+    {id:101,prestId:1,desc:'Mão de obra',data:'2026-01-30',val:4000,forma:'PIX',status:'pago',obraId:1},
+    {id:102,prestId:1,desc:'Mão de obra',data:'2026-02-13',val:3400,forma:'PIX',status:'pago',obraId:1},
+    {id:103,prestId:1,desc:'Mão de obra',data:'2026-02-27',val:3000,forma:'PIX',status:'pago',obraId:1},
+    {id:104,prestId:1,desc:'Serviço no Jeep',data:'2026-03-09',val:980,forma:'Serviço no Jeep',status:'pago',obraId:1},
+    {id:105,prestId:1,desc:'Mão de obra',data:'2026-03-13',val:4350,forma:'PIX',status:'pago',obraId:1},
+    {id:106,prestId:1,desc:'Mão de obra',data:'2026-03-27',val:10000,forma:'PIX',status:'pago',obraId:1},
+    {id:107,prestId:1,desc:'Mão de obra',data:'2026-04-10',val:6000,forma:'Dinheiro',status:'pago',obraId:1},
+    {id:108,prestId:1,desc:'Mão de obra',data:'2026-04-24',val:6700,forma:'PIX',status:'pago',obraId:1},
+    {id:109,prestId:1,desc:'Pagou junto com NF',data:'2026-04-20',val:117,forma:'NF',status:'pago',obraId:1},
+    {id:110,prestId:1,desc:'Mão de obra',data:'2026-05-08',val:7000,forma:'PIX',status:'pago',obraId:1},
+    {id:111,prestId:1,desc:'Mão de obra',data:'2026-06-05',val:7500,forma:'PIX',status:'pago',obraId:1},
+    {id:112,prestId:1,desc:'Mão de obra',data:'2026-06-19',val:7200,forma:'PIX',status:'pago',obraId:1},
+    {id:113,prestId:1,desc:'Lucas — Instalação elétrica',data:'2026-06-12',val:5000,forma:'PIX (Lucas)',status:'pago',obraId:1},
+  ];
+  var pagSer=[
+    {id:201,prestId:2,desc:'Mão de obra serralheria',data:'2026-03-12',val:12000,forma:'PIX',status:'pago',obraId:1},
+    {id:202,prestId:2,desc:'Mão de obra serralheria',data:'2026-04-30',val:5000,forma:'PIX',status:'pago',obraId:1},
+    {id:203,prestId:2,desc:'Mão de obra serralheria',data:'2026-04-30',val:4000,forma:'PIX',status:'pago',obraId:1},
+  ];
+  var pagMan=[
+    {id:301,prestId:3,desc:'Mão de obra geral',data:'2026-04-13',val:450,forma:'PIX',status:'pago',obraId:1},
+  ];
+
+  DADOS.obras=[{
+    id:1,
+    nome:'OBRA O6 — RODRY',
+    cliente:'Rodrigo',
+    end:'Pontes e Lacerda - MT',
+    orc:237040.19,
+    materiais:[
+      {id:1,data:'2026-01-26',desc:'CAÇAMBA PARA REMOÇÃO DE ENTULHO',forn:'PAPA ENTULHO',val:400,status:'pago',venc:'',forma:'PIX'},
+      {id:2,data:'2026-01-26',desc:'PEDIDO 2.220.439',forn:'HIPER JN',val:207.99,status:'pago',venc:'2026-02-16',forma:'PIX'},
+      {id:3,data:'2026-01-26',desc:'PEDRISCO 1/2 — 13,24 TN',forn:'PEDREIRA SERRANA',val:1456.40,status:'pago',venc:'',forma:'PIX'},
+      {id:4,data:'2026-01-26',desc:'FRETE PEDRA 1/2',forn:'HP TRANSPORTE',val:700,status:'pago',venc:'',forma:'PIX'},
+      {id:5,data:'2026-01-27',desc:'AREIA MEDIA 12 M2',forn:'SM AREEIRA',val:1560,status:'pago',venc:'',forma:'PIX'},
+      {id:6,data:'2026-01-27',desc:'PEDIDO 2.220.729',forn:'HIPER JN',val:1045.83,status:'pago',venc:'2026-02-15',forma:'PIX'},
+      {id:7,data:'2026-01-27',desc:'50 SACOS DE CIMENTO ITAÚ',forn:'REI DO CIMENTO',val:2650,status:'pago',venc:'',forma:'Dinheiro'},
+      {id:8,data:'2026-01-30',desc:'TIJOLO 8F — 1500 UND',forn:'CERAMICA DO TEL',val:2100,status:'pago',venc:'',forma:'PIX'},
+      {id:9,data:'2026-02-01',desc:'PEDIDO 212723',forn:'REI DO CIMENTO',val:280,status:'pago',venc:'',forma:'PIX'},
+      {id:10,data:'2026-02-03',desc:'TÁBUAS E RIPÃO — CAIXARIA DE BALDRAME',forn:'PORTILHO',val:900,status:'pago',venc:'',forma:'PIX'},
+      {id:11,data:'2026-02-04',desc:'PEDIDO 2.223.151',forn:'HIPER JN',val:1122.48,status:'pago',venc:'2026-02-19',forma:'PIX'},
+      {id:12,data:'2026-02-06',desc:'ATERRO P/ PRIMEIRA CONSTRUÇÃO',forn:'SIDINEI',val:400,status:'pago',venc:'',forma:'PIX'},
+      {id:13,data:'2026-02-11',desc:'TIJOLO 8F — 1500 UND',forn:'CERAMICA DO TEL',val:2100,status:'pago',venc:'',forma:'PIX'},
+      {id:14,data:'2026-02-23',desc:'TIJOLO 8F — 2MIL UND',forn:'CERAMICA BELA VISTA',val:2500,status:'pago',venc:'',forma:'PIX'},
+      {id:15,data:'2026-02-23',desc:'PEDIDO 2.228.969',forn:'HIPER JN',val:4053.30,status:'pago',venc:'2026-03-10',forma:'PIX'},
+      {id:16,data:'2026-02-23',desc:'TÁBUAS E RIPÃO PARA CAIXARIA',forn:'PORTILHO',val:1200,status:'pago',venc:'',forma:'PIX'},
+      {id:17,data:'2026-03-04',desc:'AREIA FINA PRA REBOCO',forn:'SM AREEIRA',val:1606,status:'pago',venc:'',forma:'PIX'},
+      {id:18,data:'2026-03-05',desc:'PEDIDO 214431',forn:'REI DO CIMENTO',val:176,status:'pago',venc:'',forma:'PIX'},
+      {id:19,data:'2026-03-09',desc:'PEDIDO 214566',forn:'REI DO CIMENTO',val:2650,status:'pago',venc:'',forma:'PIX'},
+      {id:20,data:'2026-03-12',desc:'MATERIAL PARA COBERTURA / ESTRUTURAS METÁLICAS',forn:'VANZIM',val:16500,status:'pago',venc:'',forma:'PIX'},
+      {id:21,data:'2026-03-09',desc:'INSTALAÇÃO DE CALHAS',forn:'MULTIFIX',val:1300,status:'pago',venc:'',forma:'PIX'},
+      {id:22,data:'2026-03-11',desc:'PEDIDO 13427',forn:'GUAPORE MADEIRAS',val:2112.60,status:'pago',venc:'2026-03-23',forma:'PIX'},
+      {id:23,data:'2026-03-11',desc:'TIJOLO 8F — 2MIL UNIDADES',forn:'CERAMICA BELA VISTA',val:2500,status:'pago',venc:'',forma:'PIX'},
+      {id:24,data:'2026-03-18',desc:'PEDIDO 215026',forn:'REI DO CIMENTO',val:2650,status:'pago',venc:'',forma:'PIX'},
+      {id:25,data:'2026-03-19',desc:'AREIA MEDIA 12 M2',forn:'SM AREEIRA',val:1560,status:'pago',venc:'2026-03-23',forma:'PIX'},
+      {id:26,data:'2026-03-23',desc:'PEDRISCO 1/2 — 13,24 TN',forn:'PEDREIRA SERRANA',val:2322.60,status:'pago',venc:'2026-03-23',forma:'PIX'},
+      {id:27,data:'2026-03-23',desc:'FRETE PEDRISCO',forn:'HP TRANSPORTE',val:800,status:'pago',venc:'2026-03-23',forma:'PIX'},
+      {id:28,data:'2026-04-01',desc:'SERVIÇO DE CALHAS E RUFOS',forn:'MULTIFIX',val:4000,status:'pago',venc:'',forma:'PIX'},
+      {id:29,data:'2026-04-10',desc:'PEDIDO 2786',forn:'GUAPORE MADEIRAS',val:3343.40,status:'pago',venc:'',forma:'PIX'},
+      {id:30,data:'2026-04-15',desc:'TIJOLO 8F — 1000 UNIDADE',forn:'CERAMICA DO ANDERSON',val:1100,status:'pago',venc:'',forma:'PIX'},
+      {id:31,data:'2026-04-16',desc:'PAGAMENTO PARCIAL PORTA',forn:'FAVARETTO',val:2700,status:'pago',venc:'',forma:'PIX'},
+      {id:32,data:'2026-04-17',desc:'MATERIAL DO FORRO DE GESSO',forn:'MULTIFIX',val:11000,status:'pago',venc:'',forma:'PIX'},
+      {id:33,data:'2026-04-21',desc:'NF 2811',forn:'GUAPORE MADEIRAS',val:1680,status:'pago',venc:'',forma:'PIX'},
+      {id:34,data:'2026-04-23',desc:'PAGAMENTO PARCIAL PORTA',forn:'FAVARETTO',val:2700,status:'pago',venc:'',forma:'PIX'},
+      {id:35,data:'2026-04-24',desc:'TIJOLO 8F — 200 UNIDADES',forn:'CERAMICA DO ANDERSON',val:200,status:'pago',venc:'',forma:'PIX'},
+      {id:36,data:'2026-04-28',desc:'BOLETO DO FRETE DA PORTA',forn:'WTLOG TRANSPORTE',val:1724,status:'pago',venc:'2026-05-05',forma:'Boleto'},
+      {id:37,data:'2026-04-21',desc:'AREIA MEDIA 18 M2',forn:'SM AREEIRA',val:2340,status:'pago',venc:'2026-04-21',forma:'PIX'},
+      {id:38,data:'2026-04-23',desc:'NF 2816',forn:'GUAPORE MADEIRAS',val:3949.80,status:'pago',venc:'2026-05-01',forma:'PIX'},
+      {id:39,data:'2026-05-05',desc:'NF 2845',forn:'GUAPORE MADEIRAS',val:2850,status:'pago',venc:'2026-05-21',forma:'PIX'},
+      {id:40,data:'2026-05-07',desc:'ATERRO',forn:'MAURO (CARRETÃO)',val:2450,status:'pago',venc:'',forma:'PIX'},
+      {id:41,data:'2026-05-06',desc:'CALHAS E RUFOS',forn:'CENTRAL CALHAS',val:6500,status:'pago',venc:'',forma:'PIX'},
+      {id:42,data:'2026-05-15',desc:'AREIA PARA CONTRA PISO',forn:'AREEIRA CARVALHO',val:900,status:'pago',venc:'',forma:'PIX'},
+      {id:43,data:'2026-05-15',desc:'COMPRA DE MATERIAL',forn:'MINAS FERRO',val:5800,status:'vencer',venc:'Dividido 4x',forma:'Boleto'},
+      {id:44,data:'2026-05-20',desc:'CIMENTO E ENCANAÇÃO DE ESGOTO',forn:'GUAPORE MADEIRAS',val:2030,status:'aberto',venc:'',forma:''},
+      {id:45,data:'2026-05-05',desc:'CIMENTO E ENCANAÇÃO DE ESGOTO',forn:'GUAPORE MADEIRAS',val:3191.30,status:'aberto',venc:'',forma:''},
+      {id:46,data:'2026-05-23',desc:'MATERIAL ELÉTRICO',forn:'ELETRICA BASSI',val:2400,status:'aberto',venc:'',forma:''},
+      {id:47,data:'2026-06-03',desc:'MATERIAL ELÉTRICO',forn:'ELETRICA BOM FUTURO',val:4000,status:'aberto',venc:'',forma:''},
+      {id:48,data:'2026-05-23',desc:'MATERIAL DE ENCANAÇÃO DE ESGOTO',forn:'GUAPORE MADEIRAS',val:4275,status:'aberto',venc:'2026-06-04',forma:''},
+      {id:49,data:'2026-06-08',desc:'PAGAMENTO INSTALAÇÃO DE CABOS DE CÂMERAS',forn:'BRENO (INVIOLAVEL)',val:200,status:'aberto',venc:'',forma:''},
+      {id:50,data:'2026-06-17',desc:'PISOS E ARGAMASSA (BANHEIROS)',forn:'RIBEIRO',val:4100,status:'aberto',venc:'',forma:''},
+      {id:51,data:'2026-05-06',desc:'PISOS E ARGAMASSA (BANHEIROS)',forn:'RIBEIRO',val:2500,status:'aberto',venc:'',forma:''},
+      {id:52,data:'2026-05-23',desc:'MATERIAL ENCANAÇÃO ESGOTO E ÁGUA / CIMENTO',forn:'GUAPORE MADEIRAS',val:5076,status:'aberto',venc:'2026-06-27',forma:''},
+      {id:53,data:'2026-07-01',desc:'BRITA/CIMENTO E TRELIÇA (CALÇADA)',forn:'GUAPORE MADEIRAS',val:2483,status:'aberto',venc:'2026-07-01',forma:''},
+      {id:54,data:'2026-07-04',desc:'MEIO FIO DE CALÇADA',forn:'CONCRETUBOS',val:800,status:'aberto',venc:'',forma:''},
+      {id:55,data:'2026-07-04',desc:'TINER',forn:'CASA DAS TINTAS',val:95,status:'aberto',venc:'',forma:''},
+      {id:56,data:'2026-06-28',desc:'CABOS DE CÂMERAS',forn:'BRENO (INVIOLAVEL)',val:500,status:'aberto',venc:'',forma:''},
+      {id:57,data:'2026-07-04',desc:'CIMENTO (CALÇADA)',forn:'REI DO CIMENTO',val:825,status:'aberto',venc:'',forma:''},
+    ],
+    pagamentos: pagGSA.concat(pagSer).concat(pagMan)
+  }];
+  salvar();
+}
+
+// ===== UTILS =====
+function fmt(v){return(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtD(s){if(!s)return'—';var p=s.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:s;}
+function hoje(){return new Date().toISOString().split('T')[0];}
+function gid(){return Date.now()+Math.floor(Math.random()*9999);}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2600);}
+function corCSS(cor){return'var(--'+cor+')';}
+
+function calcObra(obra){
+  var tM=0,pM=0,aM=0,vM=0,tP=0;
+  (obra.materiais||[]).forEach(function(m){
+    tM+=m.val||0;
+    if(m.status==='pago')pM+=m.val||0;
+    else if(m.status==='aberto')aM+=m.val||0;
+    else if(m.status==='vencer')vM+=m.val||0;
+  });
+  (obra.pagamentos||[]).forEach(function(p){tP+=p.val||0;});
+  return{tM:tM,pM:pM,aM:aM,vM:vM,tP:tP,total:tM+tP};
+}
+
+function calcPrestador(prestId){
+  var tot=0,pago=0,aberto=0;
+  DADOS.obras.forEach(function(obra){
+    (obra.pagamentos||[]).forEach(function(p){
+      if(p.prestId===prestId){
+        tot+=p.val||0;
+        if(p.status==='pago')pago+=p.val||0;
+        else aberto+=p.val||0;
+      }
+    });
+  });
+  return{tot:tot,pago:pago,aberto:aberto};
+}
+
+function getPagsPrestador(prestId){
+  var pags=[];
+  DADOS.obras.forEach(function(obra){
+    (obra.pagamentos||[]).forEach(function(p,pi){
+      if(p.prestId===prestId){
+        pags.push({pag:p,obraId:obra.id,obraIdx:DADOS.obras.indexOf(obra),pagIdx:pi,obraNome:obra.nome});
+      }
+    });
+  });
+  pags.sort(function(a,b){return a.pag.data.localeCompare(b.pag.data);});
+  return pags;
+}
+
+// ===== RENDER =====
+function render(){
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',i===TAB);});
+  var w=document.getElementById('main-wrap');
+  if(TAB===0)w.innerHTML=renderObras();
+  else if(TAB===1)w.innerHTML=renderPrestadores();
+  else w.innerHTML=renderResumoGeral();
+}
+
+function renderObras(){
+  var h='<button class="btn-nova" data-action="nova-obra">＋ Nova Obra</button>';
+  if(!DADOS.obras.length){h+='<div style="text-align:center;padding:30px;color:var(--txt2)">Nenhuma obra. Clique em ＋ Nova Obra.</div>';return h;}
+
+  DADOS.obras.forEach(function(obra,oi){
+    var c=calcObra(obra);
+    var pct=obra.orc>0?Math.min(100,Math.round((c.total/obra.orc)*100)):0;
+    var statusObra=obra.status||'andamento';
+    var statusCor=statusObra==='concluida'?'var(--verde)':statusObra==='pausada'?'var(--amar)':'var(--azul)';
+    var statusTxt=statusObra==='concluida'?'✅ Concluída':statusObra==='pausada'?'⏸️ Pausada':'🔨 Em andamento';
+
+    h+='<div class="obra-card"><div class="obra-hdr" data-action="toggle-obra" data-p="'+oi+'">';
+    h+='<div style="flex:1"><div style="display:flex;align-items:center;gap:6px"><div class="obra-nome">'+obra.nome+'</div><span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:'+statusCor+';color:#fff;white-space:nowrap">'+statusTxt+'</span></div>';
+    h+='<div class="obra-sub">👤 '+obra.cliente+(obra.end?' · 📍'+obra.end:'')+'</div></div>';
+    h+='<div class="obra-right"><div class="obra-total">R$ '+fmt(c.total)+'</div><div class="obra-sub2">total geral</div></div>';
+    h+='<span class="seta">›</span></div>';
+
+    h+='<div id="ob-body-'+oi+'" style="display:none">';
+
+    // Mini resumo financeiro
+    h+='<div class="obra-resumo">';
+    h+='<div class="obra-res-item"><div class="obra-res-lbl">Material</div><div class="obra-res-val" style="color:var(--azul)">R$ '+fmt(c.tM)+'</div></div>';
+    h+='<div class="obra-res-item"><div class="obra-res-lbl">Mão de Obra</div><div class="obra-res-val" style="color:var(--roxo)">R$ '+fmt(c.tP)+'</div></div>';
+    h+='<div class="obra-res-item"><div class="obra-res-lbl">Total</div><div class="obra-res-val" style="color:var(--verde)">R$ '+fmt(c.total)+'</div></div>';
+    h+='</div>';
+
+    // Badges status material
+    h+='<div style="display:flex;gap:5px;flex-wrap:wrap;padding:7px 12px;border-bottom:1px solid var(--borda)">';
+    if(c.pM>0)h+='<span class="tag pago">✅ Pago R$ '+fmt(c.pM)+'</span>';
+    if(c.aM>0)h+='<span class="tag aberto">🔴 Aberto R$ '+fmt(c.aM)+'</span>';
+    if(c.vM>0)h+='<span class="tag vencer">🟡 A vencer R$ '+fmt(c.vM)+'</span>';
+    h+='</div>';
+
+    // Progresso orçamento
+    if(obra.orc>0){
+      h+='<div class="prog-wrap"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--txt2);margin-bottom:4px"><span>Orçamento: R$ '+fmt(obra.orc)+'</span><span>'+pct+'% utilizado</span></div>';
+      h+='<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:'+(pct>90?'var(--verm)':pct>70?'var(--amar)':'var(--verde)')+'"></div></div></div>';
+    }
+
+    // ---- MATERIAIS ----
+    h+='<div class="sec-hdr"><span class="sec-titulo">📦 Compras de Material ('+(obra.materiais||[]).length+')</span><button class="sec-btn" data-action="novo-mat" data-p="'+oi+'">＋ Lançar</button></div>';
+    if(!(obra.materiais||[]).length){h+='<div class="vazia">Nenhuma compra lançada</div>';}
+    else{
+      (obra.materiais||[]).forEach(function(m,mi){
+        var parcelado=m.parcelas&&m.parcelas.length>0;
+        var pagas=parcelado?m.parcelas.filter(function(p){return p.status==='pago';}).length:0;
+        h+='<div class="lanc-item" style="'+(parcelado?'background:var(--inp);':'')+'border-left:3px solid '+(m.status==='pago'?'var(--verde)':m.status==='aberto'?'var(--verm)':'var(--amar)')+'">';
+        h+='<div class="lanc-desc">'+m.desc+(parcelado?'<span style="font-size:10px;font-weight:400;color:var(--txt2);margin-left:6px">'+pagas+'/'+m.parcelas.length+' pagas</span>':'')+'</div>';
+        h+='<div class="lanc-val">R$ '+fmt(m.val)+'</div>';
+        h+='<div class="lanc-info">🏪 '+m.forn+' &nbsp;•&nbsp; 📅 '+fmtD(m.data)+(m.venc?' &nbsp;•&nbsp; 🗓 Venc: '+fmtD(m.venc):'')+(m.dataPag?' &nbsp;•&nbsp; 💰 Pago em: '+fmtD(m.dataPag):'')+(m.forma?' &nbsp;•&nbsp; 💳 '+m.forma:'')+'</div>';
+        h+='<div class="lanc-tags">';
+        h+='<button style="background:var(--inp);border:1px solid var(--borda);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;color:var(--txt2);cursor:pointer" data-action="edit-mat" data-p="'+oi+'" data-p2="'+mi+'">✏️ Editar</button>';
+        h+='<span class="tag '+m.status+'">'+(m.status==='pago'?'✅ Pago':m.status==='aberto'?'🔴 Aberto':'🟡 A vencer')+'</span>';
+        h+='<button style="background:#FEE2E2;border:1px solid #FECACA;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--verm);cursor:pointer" data-action="del-mat" data-p="'+oi+'" data-p2="'+mi+'">🗑️ Excluir</button>';
+        h+='</div>';
+        // Parcelas
+        if(parcelado){
+          h+='<div style="grid-column:1/-1;margin-top:6px;border-top:1px dashed var(--borda);padding-top:6px">';
+          h+='<div style="font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;margin-bottom:5px">Parcelas</div>';
+          h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px">';
+          m.parcelas.forEach(function(parc,pi){
+            var corBg=parc.status==='pago'?'#DCFCE7':parc.status==='aberto'?'#FEE2E2':'#FEF3C7';
+            var corTxt=parc.status==='pago'?'#15803D':parc.status==='aberto'?'#B91C1C':'#D97706';
+            h+='<div style="background:'+corBg+';border-radius:6px;padding:5px 8px;font-size:10px">';
+            h+='<div style="font-weight:700;color:'+corTxt+'">'+(pi+1)+'ª parcela — R$ '+fmt(parc.val)+'</div>';
+            h+='<div style="color:'+corTxt+';opacity:.8">📅 '+fmtD(parc.venc)+'</div>';
+            if(parc.dataPag)h+='<div style="color:'+corTxt+';opacity:.8">💰 '+fmtD(parc.dataPag)+'</div>';
+            h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px">';
+            h+='<span style="font-weight:700;color:'+corTxt+'">'+(parc.status==='pago'?'✅ Paga':parc.status==='aberto'?'🔴 Em aberto':'🟡 A vencer')+'</span>';
+            h+='<button style="background:none;border:none;font-size:11px;cursor:pointer;color:'+corTxt+';padding:1px 4px;font-weight:700" data-action="toggle-parcela" data-p="'+oi+'" data-p2="'+mi+'" data-p3="'+pi+'">'+(parc.status==='pago'?'↩️':'✅')+'</button>';
+            h+='</div></div>';
+          });
+          h+='</div></div>';
+        }
+        h+='</div>';
+      });
+      h+='<div class="sec-total"><span>Total material</span><span style="color:var(--azul)">R$ '+fmt(c.tM)+'</span></div>';
+    }
+
+    // ---- MÃO DE OBRA POR PRESTADOR ----
+    h+='<div class="sec-hdr"><span class="sec-titulo">👷 Mão de Obra por Prestador</span><button class="sec-btn roxo" data-action="novo-pag-obra" data-p="'+oi+'">＋ Lançar</button></div>';
+
+    // Agrupar por prestador
+    var grupos={};
+    (obra.pagamentos||[]).forEach(function(p,pi){
+      var pid=p.prestId;
+      if(!grupos[pid])grupos[pid]=[];
+      grupos[pid].push({pag:p,pi:pi});
+    });
+
+    if(!Object.keys(grupos).length){h+='<div class="vazia">Nenhum pagamento de mão de obra</div>';}
+    else{
+      var totGeral=0;
+      Object.keys(grupos).forEach(function(pid){
+        var prest=DADOS.prestadores.find(function(pr){return pr.id===+pid;})||{nome:'Prestador #'+pid,cor:'roxo'};
+        var items=grupos[pid];
+        var totPrest=items.reduce(function(s,x){return s+x.pag.val;},0);
+        totGeral+=totPrest;
+        var pago=items.filter(function(x){return x.pag.status==='pago';}).reduce(function(s,x){return s+x.pag.val;},0);
+        var aberto=totPrest-pago;
+
+        h+='<div style="padding:7px 13px 4px;background:var(--inp);border-top:1px solid var(--borda);display:flex;justify-content:space-between;align-items:center">';
+        h+='<div style="font-size:11px;font-weight:700;color:'+corCSS(prest.cor||'roxo')+'">👷 '+prest.nome+'</div>';
+        h+='<div style="font-size:11px;text-align:right"><span style="font-weight:700;color:'+corCSS(prest.cor||'roxo')+'">R$ '+fmt(totPrest)+'</span>';
+        if(aberto>0)h+='<span style="color:var(--verm);font-size:10px;margin-left:6px">🔴 R$ '+fmt(aberto)+' a pagar</span>';
+        h+='</div></div>';
+
+        // Tabela de pagamentos do prestador nessa obra
+        h+='<div style="display:grid;grid-template-columns:85px 1fr auto auto;gap:0;font-size:11px">';
+        h+='<div style="padding:4px 8px;background:var(--bg);font-weight:700;color:var(--txt2);border-bottom:1px solid var(--borda);font-size:10px">DATA</div>';
+        h+='<div style="padding:4px 8px;background:var(--bg);font-weight:700;color:var(--txt2);border-bottom:1px solid var(--borda);font-size:10px">DESCRIÇÃO / FORMA</div>';
+        h+='<div style="padding:4px 8px;background:var(--bg);font-weight:700;color:var(--txt2);border-bottom:1px solid var(--borda);font-size:10px;text-align:right">VALOR</div>';
+        h+='<div style="padding:4px 4px;background:var(--bg);border-bottom:1px solid var(--borda)"></div>';
+
+        items.forEach(function(x,xi){
+          var p=x.pag,pi=x.pi;
+          var bg=xi%2===0?'var(--card)':'var(--inp)';
+          h+='<div style="padding:7px 8px;background:'+bg+';border-bottom:1px solid var(--borda);font-size:11px;color:var(--txt2)">'+fmtD(p.data)+'</div>';
+          h+='<div style="padding:7px 8px;background:'+bg+';border-bottom:1px solid var(--borda)">';
+          h+='<div style="font-weight:600;color:var(--txt);font-size:11px">'+p.desc+'</div>';
+          h+='<div style="font-size:10px;color:var(--txt2)">💳 '+p.forma+' &nbsp;<span class="tag '+p.status+'">'+(p.status==='pago'?'Pago':'A pagar')+'</span></div>';
+          h+='</div>';
+          h+='<div style="padding:7px 8px;background:'+bg+';border-bottom:1px solid var(--borda);font-weight:700;text-align:right;color:var(--txt)">R$ '+fmt(p.val)+'</div>';
+          h+='<div style="padding:4px 4px;background:'+bg+';border-bottom:1px solid var(--borda);display:flex;gap:3px;align-items:center;justify-content:center">';
+          h+='<button style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--azul);padding:3px" data-action="edit-pag" data-p="'+oi+'" data-p2="'+pi+'">✏️</button>';
+          h+='<button style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--verm);padding:3px" data-action="del-pag" data-p="'+oi+'" data-p2="'+pi+'">🗑️</button>';
+          h+='</div>';
+        });
+        h+='</div>';
+
+        // Total do prestador nessa obra
+        h+='<div style="display:flex;justify-content:space-between;padding:6px 13px;background:var(--inp);border-top:1px solid var(--borda);font-size:12px;font-weight:700">';
+        h+='<span style="color:'+corCSS(prest.cor||'roxo')+'">Total '+prest.nome+'</span>';
+        h+='<span style="color:'+corCSS(prest.cor||'roxo')+'">R$ '+fmt(totPrest)+'</span></div>';
+      });
+      h+='<div class="sec-total"><span>Total mão de obra</span><span style="color:var(--roxo)">R$ '+fmt(c.tP)+'</span></div>';
+    }
+
+    // Botões
+    h+='<div style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--borda)">';
+    h+='<button class="bcl" style="flex:1" data-action="pdf-obra" data-p="'+oi+'">📄 PDF</button>';
+    h+='<button class="bcl" style="flex:1;color:var(--azul);border-color:var(--azul)" data-action="edit-obra" data-p="'+oi+'">✏️ Editar</button>';
+    h+='<button class="bcl" style="flex:1;color:var(--verm);border-color:var(--verm)" data-action="del-obra" data-p="'+oi+'">🗑️</button>';
+    h+='</div>';
+
+    h+='</div></div>'; // fecha body e obra-card
+  });
+  return h;
+}
+
+function renderPrestadores(){
+  var h='<button class="btn-nova roxo" data-action="novo-prest">＋ Cadastrar Prestador</button>';
+  if(!DADOS.prestadores.length){h+='<div style="text-align:center;padding:30px;color:var(--txt2)">Nenhum prestador cadastrado.</div>';return h;}
+
+  DADOS.prestadores.forEach(function(prest,pi){
+    var c=calcPrestador(prest.id);
+    var pags=getPagsPrestador(prest.id);
+
+    h+='<div class="prest-card">';
+    h+='<div class="prest-hdr" style="border-left-color:'+corCSS(prest.cor||'roxo')+'" data-action="toggle-prest" data-p="'+pi+'">';
+    h+='<div style="flex:1;min-width:0"><div class="prest-nome">'+prest.nome+'</div><div class="prest-tipo">'+prest.tipo+(prest.tel?' &nbsp;•&nbsp; 📞 '+prest.tel:'')+'</div>';
+    h+='<div style="display:flex;gap:4px;margin-top:5px;">';
+    if(c.pago>0)h+='<span class="tag pago">✅ Pago R$ '+fmt(c.pago)+'</span>';
+    if(c.aberto>0)h+='<span class="tag aberto">🔴 A pagar R$ '+fmt(c.aberto)+'</span>';
+    h+='</div></div>';
+    h+='<div style="text-align:right;flex-shrink:0;min-width:120px;margin-left:8px"><div class="prest-total" style="color:'+corCSS(prest.cor||'roxo')+'">R$ '+fmt(c.tot)+'</div><div style="font-size:10px;color:var(--txt2)">total geral</div></div>';
+    h+='<span class="seta" style="color:'+corCSS(prest.cor||'roxo')+';flex-shrink:0;margin-left:4px">›</span></div>';
+
+    // Body
+    h+='<div id="pr-body-'+pi+'" style="display:none">';
+    h+='<div class="sec-hdr"><span class="sec-titulo">Histórico de Pagamentos</span><button class="sec-btn" style="background:'+corCSS(prest.cor||'roxo')+'" data-action="novo-pag-prest" data-p="'+pi+'">＋ Novo Pagamento</button></div>';
+
+    if(!pags.length){h+='<div class="vazia">Nenhum pagamento lançado</div>';}
+    else{
+      // Agrupar por obra
+      var porObra={};
+      pags.forEach(function(x){
+        var k=x.obraId;
+        if(!porObra[k])porObra[k]={nome:x.obraNome,pags:[]};
+        porObra[k].pags.push(x);
+      });
+
+      Object.keys(porObra).forEach(function(obraId){
+        var grupo=porObra[obraId];
+        var totObra=grupo.pags.reduce(function(s,x){return s+x.pag.val;},0);
+        h+='<div style="padding:6px 13px;background:var(--inp);border-top:1px solid var(--borda);font-size:11px;font-weight:700;color:var(--txt2);display:flex;justify-content:space-between">';
+        h+='<span>🏗️ '+grupo.nome+'</span><span>R$ '+fmt(totObra)+'</span></div>';
+
+        // Cabeçalho tabela
+        h+='<div style="display:grid;grid-template-columns:85px 1fr 90px auto auto;font-size:10px;font-weight:700;color:var(--txt2);background:var(--bg);border-bottom:1px solid var(--borda)">';
+        h+='<div style="padding:4px 8px">DATA</div><div style="padding:4px 8px">DESCRIÇÃO</div><div style="padding:4px 8px">FORMA PAGT.</div><div style="padding:4px 8px;text-align:right">VALOR</div><div></div></div>';
+
+        grupo.pags.forEach(function(x,xi){
+          var p=x.pag;
+          var bg=xi%2===0?'var(--card)':'var(--inp)';
+          h+='<div style="display:grid;grid-template-columns:85px 1fr 90px auto auto auto;border-bottom:1px solid var(--borda);background:'+bg+';align-items:center">';
+          h+='<div style="padding:7px 8px;font-size:11px;color:var(--txt2)">'+fmtD(p.data)+'</div>';
+          h+='<div style="padding:7px 8px"><div style="font-size:11px;font-weight:600">'+p.desc+'</div><span class="tag '+p.status+'" style="margin-top:2px">'+(p.status==='pago'?'✅ Pago':'🔴 A pagar')+'</span></div>';
+          h+='<div style="padding:7px 8px;font-size:11px;color:var(--txt2)">'+p.forma+'</div>';
+          h+='<div style="padding:7px 8px;font-weight:700;font-size:12px;text-align:right;color:var(--txt)">R$ '+fmt(p.val)+'</div>';
+          h+='<div style="padding:4px 4px;text-align:center"><button style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--azul);padding:3px" data-action="edit-pag-prest" data-p="'+x.obraIdx+'" data-p2="'+x.pagIdx+'">✏️</button></div>';
+          h+='<div style="padding:4px 4px;text-align:center"><button style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--verm);padding:3px" data-action="del-pag-prest" data-p="'+x.obraIdx+'" data-p2="'+x.pagIdx+'">🗑️</button></div>';
+          h+='</div>';
+        });
+      });
+
+      // Total geral prestador
+      h+='<div style="display:flex;justify-content:space-between;padding:9px 13px;background:var(--inp);border-top:2px solid '+corCSS(prest.cor||'roxo')+';font-size:13px;font-weight:800">';
+      h+='<span style="color:'+corCSS(prest.cor||'roxo')+'">TOTAL '+prest.nome.toUpperCase()+'</span>';
+      h+='<span style="color:'+corCSS(prest.cor||'roxo')+'">R$ '+fmt(c.tot)+'</span></div>';
+    }
+
+    // Botões editar/excluir
+    h+='<div style="display:flex;gap:8px;padding:9px 12px;border-top:1px solid var(--borda)">';
+    h+='<button class="bcl" style="flex:1;color:var(--azul);border-color:var(--azul)" data-action="edit-prest" data-p="'+pi+'">✏️ Editar</button>';
+    h+='<button class="bcl" style="flex:1;color:var(--verm);border-color:var(--verm)" data-action="del-prest" data-p="'+pi+'">🗑️ Excluir</button>';
+    h+='</div>';
+    h+='</div></div>'; // fecha body e prest-card
+  });
+  return h;
+}
+
+function renderResumoGeral(){
+  var totMat=0,totMdo=0,totAberto=0,totVencer=0,totPago=0;
+  DADOS.obras.forEach(function(obra){
+    var c=calcObra(obra);
+    totMat+=c.tM; totMdo+=c.tP; totAberto+=c.aM; totVencer+=c.vM; totPago+=c.pM;
+  });
+  var total=totMat+totMdo;
+
+  var h='<div class="res-grid">';
+  h+='<div class="res-card" style="grid-column:1/-1"><div class="res-lbl">💰 Total Geral</div><div class="res-val verde">R$ '+fmt(total)+'</div></div>';
+  h+='<div class="res-card"><div class="res-lbl">📦 Material</div><div class="res-val azul">R$ '+fmt(totMat)+'</div></div>';
+  h+='<div class="res-card"><div class="res-lbl">👷 Mão de Obra</div><div class="res-val roxo">R$ '+fmt(totMdo)+'</div></div>';
+  h+='<div class="res-card"><div class="res-lbl">✅ Pago Material</div><div class="res-val verde">R$ '+fmt(totPago)+'</div></div>';
+  h+='<div class="res-card"><div class="res-lbl">🔴 Em Aberto</div><div class="res-val verm">R$ '+fmt(totAberto)+'</div></div>';
+  h+='<div class="res-card"><div class="res-lbl">🟡 A Vencer</div><div class="res-val amar">R$ '+fmt(totVencer)+'</div></div>';
+  h+='</div>';
+
+  // Por prestador
+  if(DADOS.prestadores.length){
+    h+='<div style="font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;margin-bottom:8px">Por Prestador</div>';
+    DADOS.prestadores.forEach(function(prest){
+      var c=calcPrestador(prest.id);
+      if(!c.tot)return;
+      h+='<div class="res-card" style="margin-bottom:8px;border-left:4px solid '+corCSS(prest.cor||'roxo')+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      h+='<div><div class="res-lbl">'+prest.nome+'</div><div style="font-size:10px;color:var(--txt2)">'+prest.tipo+'</div></div>';
+      h+='<div style="text-align:right"><div style="font-size:17px;font-weight:700;color:'+corCSS(prest.cor||'roxo')+'">R$ '+fmt(c.tot)+'</div>';
+      if(c.pago>0)h+='<div style="font-size:10px;color:var(--verde)">✅ Pago: R$ '+fmt(c.pago)+'</div>';
+      if(c.aberto>0)h+='<div style="font-size:10px;color:var(--verm)">🔴 A pagar: R$ '+fmt(c.aberto)+'</div>';
+      h+='</div></div></div>';
+    });
+  }
+
+  // Por obra
+  h+='<div style="font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;margin:10px 0 8px">Por Obra</div>';
+  DADOS.obras.forEach(function(obra,oi){
+    var c=calcObra(obra);
+    var pct=obra.orc>0?Math.min(100,Math.round((c.total/obra.orc)*100)):0;
+    h+='<div class="obra-card" style="cursor:pointer;margin-bottom:9px" data-action="ir-obra" data-p="'+oi+'">';
+    h+='<div style="padding:12px 14px;border-left:4px solid var(--verm)">';
+    h+='<div style="display:flex;justify-content:space-between;margin-bottom:8px">';
+    h+='<div><div class="obra-nome">'+obra.nome+'</div><div class="obra-sub">'+obra.cliente+'</div></div>';
+    h+='<div class="obra-total">R$ '+fmt(c.total)+'</div></div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;font-size:11px">';
+    h+='<div style="text-align:center"><div style="color:var(--txt2)">Material</div><div style="font-weight:700;color:var(--azul)">R$ '+fmt(c.tM)+'</div></div>';
+    h+='<div style="text-align:center"><div style="color:var(--txt2)">Mão de obra</div><div style="font-weight:700;color:var(--roxo)">R$ '+fmt(c.tP)+'</div></div>';
+    h+='<div style="text-align:center"><div style="color:var(--txt2)">Orçamento</div><div style="font-weight:700">R$ '+fmt(obra.orc)+'</div></div>';
+    h+='</div>';
+    if(obra.orc>0){
+      h+='<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:'+(pct>90?'var(--verm)':pct>70?'var(--amar)':'var(--verde)')+'"></div></div>';
+      h+='<div style="font-size:10px;color:var(--txt2);text-align:right;margin-top:2px">'+pct+'% do orçamento utilizado</div>';
+    }
+    h+='</div></div>';
+  });
+  return h;
+}
+
+// ===== TOGGLE =====
+function toggleObra(oi){
+  var el=document.getElementById('ob-body-'+oi);
+  if(el){el.style.display=el.style.display==='none'?'block':'none';}
+}
+function togglePrest(pi){
+  var el=document.getElementById('pr-body-'+pi);
+  if(el){el.style.display=el.style.display==='none'?'block':'none';}
+}
+
+// ===== CRUD OBRAS =====
+function salvarObra(){
+  var nome=document.getElementById('o-nome').value.trim();
+  if(!nome){toast('Informe o nome da obra');return;}
+  DADOS.obras.push({id:gid(),nome:nome,cliente:document.getElementById('o-cliente').value.trim()||'—',end:document.getElementById('o-end').value.trim(),orc:parseFloat(document.getElementById('o-orc').value)||0,status:'andamento',materiais:[],pagamentos:[]});
+  salvar();fecharModal('modal-obra');render();toast('✅ Obra criada!');
+}
+
+function abrirEditObra(oi){
+  var obra=DADOS.obras[oi];
+  CTX.obraIdx=oi;
+  document.getElementById('eo-nome').value=obra.nome||'';
+  document.getElementById('eo-cliente').value=obra.cliente||'';
+  document.getElementById('eo-end').value=obra.end||'';
+  document.getElementById('eo-orc').value=obra.orc||'';
+  document.getElementById('eo-status').value=obra.status||'andamento';
+  setTimeout(function(){document.getElementById('modal-edit-obra').classList.add('on');},80);
+}
+
+function salvarEditObra(){
+  var oi=CTX.obraIdx;
+  var nome=document.getElementById('eo-nome').value.trim();
+  if(!nome){toast('Informe o nome da obra');return;}
+  DADOS.obras[oi].nome=nome;
+  DADOS.obras[oi].cliente=document.getElementById('eo-cliente').value.trim()||'—';
+  DADOS.obras[oi].end=document.getElementById('eo-end').value.trim();
+  DADOS.obras[oi].orc=parseFloat(document.getElementById('eo-orc').value)||0;
+  DADOS.obras[oi].status=document.getElementById('eo-status').value;
+  salvar();fecharModal('modal-edit-obra');renderEReabrir(oi);toast('✅ Obra atualizada!');
+}
+
+function delObra(oi){
+  if(!confirm('Excluir "'+DADOS.obras[oi].nome+'"?\nTodos os dados serão perdidos.'))return;
+  DADOS.obras.splice(oi,1);salvar();render();toast('Obra excluída');
+}
+
+// ===== CRUD MATERIAL =====
+function salvarMat(){
+  var desc=document.getElementById('m-desc').value.trim();
+  var val=parseFloat(document.getElementById('m-val').value)||0;
+  if(!desc||!val){toast('Preencha descrição e valor');return;}
+  var oi=CTX.obraIdx;
+  if(!DADOS.obras[oi].materiais)DADOS.obras[oi].materiais=[];
+
+  // Coletar parcelas se parcelado
+  var parcelas=[];
+  if(document.getElementById('m-parcelado').checked){
+    var itens=document.querySelectorAll('.parcela-row');
+    itens.forEach(function(row){
+      var venc=row.querySelector('.parc-venc').value;
+      var pval=parseFloat(row.querySelector('.parc-val').value)||0;
+      if(venc&&pval>0) parcelas.push({venc:venc,val:pval,status:'aberto',dataPag:''});
+    });
+  }
+
+  DADOS.obras[oi].materiais.push({
+    id:gid(),
+    data:document.getElementById('m-data').value||hoje(),
+    desc:desc,
+    forn:document.getElementById('m-forn').value.trim()||'—',
+    val:val,
+    status:document.getElementById('m-status').value,
+    venc:document.getElementById('m-venc').value||'',
+    dataPag:'',
+    forma:document.getElementById('m-forma').value,
+    parcelas:parcelas
+  });
+  salvar();fecharModal('modal-mat');renderEReabrir(oi);toast('✅ Material lançado!');
+}
+
+function delMat(oi,mi){
+  var m=DADOS.obras[oi].materiais[mi];
+  if(!confirm('🗑️ Excluir este lançamento?\n\n"'+m.desc+'"\nFornecedor: '+m.forn+'\nValor: R$ '+fmt(m.val)+'\n\nEsta ação não pode ser desfeita.'))return;
+  DADOS.obras[oi].materiais.splice(mi,1);salvar();renderEReabrir(oi);toast('🗑️ Lançamento excluído');
+}
+
+// ===== EDITAR STATUS MATERIAL =====
+function abrirEditMat(oi,mi){
+  var m=DADOS.obras[oi].materiais[mi];
+  CTX.obraIdx=oi; CTX.matIdx=mi;
+  document.getElementById('edit-mat-info').innerHTML=
+    '<b>'+m.desc+'</b><br>🏪 '+m.forn+' &nbsp;•&nbsp; R$ '+fmt(m.val)+'<br>📅 Compra: '+fmtD(m.data);
+  document.getElementById('edit-status').value=m.status||'aberto';
+  document.getElementById('edit-datapag').value=m.dataPag||'';
+  document.getElementById('edit-venc').value=m.venc||'';
+  document.getElementById('edit-forma').value=m.forma||'PIX';
+  setTimeout(function(){document.getElementById('modal-edit-mat').classList.add('on');},80);
+}
+
+function salvarEditMat(){
+  var oi=CTX.obraIdx, mi=CTX.matIdx;
+  var m=DADOS.obras[oi].materiais[mi];
+  m.status=document.getElementById('edit-status').value;
+  m.dataPag=document.getElementById('edit-datapag').value||'';
+  m.venc=document.getElementById('edit-venc').value||'';
+  m.forma=document.getElementById('edit-forma').value;
+  // Se marcou como pago e tem parcelas, marca todas como pagas
+  if(m.status==='pago'&&m.parcelas&&m.parcelas.length>0){
+    m.parcelas.forEach(function(p){p.status='pago';if(!p.dataPag)p.dataPag=m.dataPag||hoje();});
+  }
+  salvar();fecharModal('modal-edit-mat');renderEReabrir(oi);toast('✅ Status atualizado!');
+}
+
+// ===== TOGGLE PARCELA =====
+function toggleParcela(oi,mi,pi){
+  var parc=DADOS.obras[oi].materiais[mi].parcelas[pi];
+  if(parc.status==='pago'){parc.status='aberto';parc.dataPag='';}
+  else{parc.status='pago';parc.dataPag=hoje();}
+  // Atualiza status geral do material baseado nas parcelas
+  var mat=DADOS.obras[oi].materiais[mi];
+  if(mat.parcelas&&mat.parcelas.length>0){
+    var todasPagas=mat.parcelas.every(function(p){return p.status==='pago';});
+    var algumaPaga=mat.parcelas.some(function(p){return p.status==='pago';});
+    mat.status=todasPagas?'pago':algumaPaga?'vencer':'aberto';
+  }
+  salvar();renderEReabrir(oi);toast(parc.status==='pago'?'✅ Parcela marcada como paga':'↩️ Parcela desmarcada');
+}
+
+// ===== GERAR PARCELAS =====
+function gerarParcelas(){
+  var val=parseFloat(document.getElementById('m-val').value)||0;
+  var n=parseInt(document.getElementById('m-nparcelas').value)||2;
+  var dataBase=document.getElementById('m-data').value||hoje();
+  if(!val){toast('Informe o valor total primeiro');return;}
+  var valParc=Math.round((val/n)*100)/100;
+  var lista=document.getElementById('parcelas-lista');
+  var h='';
+  for(var i=0;i<n;i++){
+    // Data: mês seguinte para cada parcela
+    var d=new Date(dataBase+'T00:00:00');
+    d.setMonth(d.getMonth()+i+1);
+    var ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    h+='<div class="parcela-row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px 0;border-bottom:1px solid var(--borda)">';
+    h+='<div><div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:3px">'+(i+1)+'ª PARCELA — R$</div>';
+    h+='<input class="parc-val" type="number" value="'+valParc+'" inputmode="decimal" style="width:100%;padding:7px 9px;border:1.5px solid var(--borda);border-radius:6px;font-size:13px;background:var(--inp);color:var(--txt)"></div>';
+    h+='<div><div style="font-size:10px;font-weight:700;color:var(--txt2);margin-bottom:3px">VENCIMENTO</div>';
+    h+='<input class="parc-venc" type="date" value="'+ds+'" style="width:100%;padding:7px 9px;border:1.5px solid var(--borda);border-radius:6px;font-size:13px;background:var(--inp);color:var(--txt)"></div>';
+    h+='</div>';
+  }
+  lista.innerHTML=h;
+}
+
+// Mostrar/ocultar seção de parcelas
+document.addEventListener('change',function(e){
+  if(e.target.id==='m-parcelado'){
+    document.getElementById('parcelas-wrap').style.display=e.target.checked?'block':'none';
+    if(e.target.checked)gerarParcelas();
+  }
+});
+
+// ===== CRUD PAGAMENTOS =====
+function salvarPag(){
+  var val=parseFloat(document.getElementById('pag-val').value)||0;
+  var desc=document.getElementById('pag-desc').value.trim();
+  if(!val){toast('Informe o valor');return;}
+  var obraId=parseInt(document.getElementById('pag-obra').value);
+  var obraIdx=DADOS.obras.findIndex(function(o){return o.id===obraId;});
+  if(obraIdx<0){toast('Selecione uma obra');return;}
+  if(!DADOS.obras[obraIdx].pagamentos)DADOS.obras[obraIdx].pagamentos=[];
+  DADOS.obras[obraIdx].pagamentos.push({id:gid(),prestId:CTX.prestId||0,desc:desc||'Pagamento',data:document.getElementById('pag-data').value||hoje(),val:val,forma:document.getElementById('pag-forma').value,status:document.getElementById('pag-status').value,obraId:obraId});
+  salvar();fecharModal('modal-pag');render();toast('✅ Pagamento lançado!');
+}
+function delPag(obraIdx,pagIdx){
+  var p=DADOS.obras[obraIdx].pagamentos[pagIdx];
+  var prest=DADOS.prestadores.find(function(pr){return pr.id===p.prestId;})||{nome:'Prestador'};
+  if(!confirm('🗑️ Excluir este pagamento?\n\nPrestador: '+prest.nome+'\nDescrição: '+p.desc+'\nValor: R$ '+fmt(p.val)+'\nData: '+fmtD(p.data)+'\n\nEsta ação não pode ser desfeita.'))return;
+  var scrollY=window.scrollY||window.pageYOffset;
+  DADOS.obras[obraIdx].pagamentos.splice(pagIdx,1);salvar();
+  render();
+  if(TAB===0){var el=document.getElementById('ob-body-'+obraIdx);if(el)el.style.display='block';}
+  setTimeout(function(){window.scrollTo({top:scrollY,behavior:'instant'});},10);
+  toast('🗑️ Pagamento excluído');
+}
+
+// ===== CRUD PRESTADORES =====
+function salvarPrest(){
+  var nome=document.getElementById('pr-nome').value.trim();
+  if(!nome){toast('Informe o nome');return;}
+  DADOS.prestadores.push({id:gid(),nome:nome,tipo:document.getElementById('pr-tipo').value.trim()||'Mão de obra',tel:document.getElementById('pr-tel').value.trim(),cor:document.getElementById('pr-cor').value});
+  salvar();fecharModal('modal-prest');render();toast('✅ Prestador cadastrado!');
+}
+
+function abrirEditPrest(pi){
+  var pr=DADOS.prestadores[pi];
+  CTX.prestIdx=pi;
+  document.getElementById('ep-nome').value=pr.nome||'';
+  document.getElementById('ep-tipo').value=pr.tipo||'';
+  document.getElementById('ep-tel').value=pr.tel||'';
+  document.getElementById('ep-cor').value=pr.cor||'roxo';
+  setTimeout(function(){document.getElementById('modal-edit-prest').classList.add('on');},80);
+}
+
+function salvarEditPrest(){
+  var pi=CTX.prestIdx;
+  var nome=document.getElementById('ep-nome').value.trim();
+  if(!nome){toast('Informe o nome');return;}
+  DADOS.prestadores[pi].nome=nome;
+  DADOS.prestadores[pi].tipo=document.getElementById('ep-tipo').value.trim()||'Mão de obra';
+  DADOS.prestadores[pi].tel=document.getElementById('ep-tel').value.trim();
+  DADOS.prestadores[pi].cor=document.getElementById('ep-cor').value;
+  salvar();fecharModal('modal-edit-prest');
+  var scrollY=window.scrollY||window.pageYOffset;
+  render();
+  var el=document.getElementById('pr-body-'+pi);
+  if(el)el.style.display='block';
+  setTimeout(function(){window.scrollTo({top:scrollY,behavior:'instant'});},10);
+  toast('✅ Prestador atualizado!');
+}
+
+function delPrest(pi){
+  if(!confirm('Excluir prestador "'+DADOS.prestadores[pi].nome+'"?'))return;
+  DADOS.prestadores.splice(pi,1);salvar();render();toast('Prestador excluído');
+}
+
+// ===== EDITAR PAGAMENTO MÃO DE OBRA =====
+function abrirEditPag(obraIdx,pagIdx){
+  var p=DADOS.obras[obraIdx].pagamentos[pagIdx];
+  CTX.obraIdx=obraIdx; CTX.pagIdx=pagIdx;
+  var prest=DADOS.prestadores.find(function(pr){return pr.id===p.prestId;})||{nome:'Prestador'};
+  document.getElementById('edit-pag-info').innerHTML='👷 '+prest.nome+' — '+DADOS.obras[obraIdx].nome;
+  document.getElementById('ep-desc').value=p.desc||'';
+  document.getElementById('ep-data').value=p.data||'';
+  document.getElementById('ep-val').value=p.val||'';
+  document.getElementById('ep-forma').value=p.forma||'PIX';
+  document.getElementById('ep-status').value=p.status||'pago';
+  setTimeout(function(){document.getElementById('modal-edit-pag').classList.add('on');},80);
+}
+
+function salvarEditPag(){
+  var oi=CTX.obraIdx, pi=CTX.pagIdx;
+  var val=parseFloat(document.getElementById('ep-val').value)||0;
+  if(!val){toast('Informe o valor');return;}
+  var p=DADOS.obras[oi].pagamentos[pi];
+  p.desc=document.getElementById('ep-desc').value.trim()||p.desc;
+  p.data=document.getElementById('ep-data').value||p.data;
+  p.val=val;
+  p.forma=document.getElementById('ep-forma').value;
+  p.status=document.getElementById('ep-status').value;
+  salvar();fecharModal('modal-edit-pag');
+  var scrollY=window.scrollY||window.pageYOffset;
+  render();
+  // Reabrir obra ou prestador conforme aba ativa
+  if(TAB===0){var el=document.getElementById('ob-body-'+oi);if(el)el.style.display='block';}
+  setTimeout(function(){window.scrollTo({top:scrollY,behavior:'instant'});},10);
+  toast('✅ Pagamento atualizado!');
+}
+
+// ===== PDF =====
+function gerarPdf(oi){
+  var obra=DADOS.obras[oi]; var c=calcObra(obra);
+  var d=new Date(); var dh=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+
+  var mRows='';
+  (obra.materiais||[]).forEach(function(m,i){
+    mRows+='<tr><td>'+(i+1)+'</td><td>'+fmtD(m.data)+'</td><td>'+m.desc+'</td><td>'+m.forn+'</td><td>'+m.forma+'</td><td style="color:'+(m.status==='pago'?'#15803D':m.status==='aberto'?'#B91C1C':'#D97706')+'">'+(m.status==='pago'?'✅ Pago':m.status==='aberto'?'🔴 Aberto':'🟡 A vencer')+'</td><td style="text-align:right;font-weight:700">R$ '+fmt(m.val)+'</td></tr>';
+  });
+
+  // Mão de obra por prestador
+  var mdo='';
+  var grupos={};
+  (obra.pagamentos||[]).forEach(function(p){
+    var pid=p.prestId;
+    if(!grupos[pid])grupos[pid]=[];
+    grupos[pid].push(p);
+  });
+  Object.keys(grupos).forEach(function(pid){
+    var prest=DADOS.prestadores.find(function(pr){return pr.id===+pid;})||{nome:'Prestador #'+pid};
+    var items=grupos[pid];
+    var totP=items.reduce(function(s,p){return s+p.val;},0);
+    mdo+='<tr style="background:#f3e8ff"><td colspan="5" style="font-weight:700;padding:6px 8px">👷 '+prest.nome+'</td><td style="font-weight:700;text-align:right;padding:6px 8px">R$ '+fmt(totP)+'</td></tr>';
+    items.forEach(function(p){
+      mdo+='<tr><td>'+fmtD(p.data)+'</td><td colspan="2">'+p.desc+'</td><td>'+p.forma+'</td><td style="color:'+(p.status==='pago'?'#15803D':'#B91C1C')+'">'+(p.status==='pago'?'✅ Pago':'🔴 A pagar')+'</td><td style="text-align:right;font-weight:700">R$ '+fmt(p.val)+'</td></tr>';
+    });
+    mdo+='<tr style="background:#ede9fe"><td colspan="5" style="font-size:11px;font-weight:700;padding:4px 8px">Subtotal '+prest.nome+'</td><td style="font-weight:800;color:#7C3AED;text-align:right;padding:4px 8px">R$ '+fmt(totP)+'</td></tr>';
+  });
+
+  var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;color:#0F172A;padding:14px;background:#F8FAFC}@media print{body{background:#fff;padding:6px}@page{margin:9mm}.np{display:none!important}}.np{display:block;width:100%;padding:11px;background:#B91C1C;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px}.cov{background:#B91C1C;border-radius:9px;padding:13px 15px;margin-bottom:11px}.cov h1{color:#FFD700;font-size:17px;font-weight:700;margin-bottom:3px}.cov p{font-size:11px;color:rgba(255,255,255,.75)}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px}.gc{background:#fff;border:1px solid #E2E8F0;border-radius:7px;padding:9px;text-align:center}.gl{font-size:9px;color:#64748B;text-transform:uppercase;font-weight:700;margin-bottom:2px}.gv{font-size:15px;font-weight:700}.verde{color:#15803D}.verm{color:#B91C1C}.azul{color:#1E40AF}.roxo{color:#7C3AED}.amar{color:#D97706}.sec{font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.05em;margin:11px 0 5px;padding-bottom:3px;border-bottom:2px solid #B91C1C}.tw{background:#fff;border-radius:7px;overflow:hidden;border:1px solid #E2E8F0;margin-bottom:11px}table{width:100%;border-collapse:collapse}thead tr{background:#B91C1C;color:#fff}th{padding:5px 7px;text-align:left;font-weight:700;font-size:10px}td{padding:4px 7px;border-bottom:1px solid #F1F5F9}tr:nth-child(even) td{background:#F8FAFC}tfoot tr{background:#FEF2F2}tfoot td{padding:5px 7px;font-weight:700;border-top:2px solid #B91C1C}.foot{text-align:center;color:#94A3B8;font-size:10px;margin-top:10px;padding-top:8px;border-top:1px solid #E2E8F0}';
+  var pct=obra.orc>0?Math.round((c.total/obra.orc)*100):0;
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+obra.nome+'</title><style>'+css+'</style></head><body>'+
+    '<button class="np" onclick="window.print()">📄 Imprimir / Salvar PDF</button>'+
+    '<div class="cov"><h1>🏗️ '+obra.nome+'</h1><p>Cliente: '+obra.cliente+(obra.end?' | '+obra.end:'')+(obra.orc?' | Orçamento: R$ '+fmt(obra.orc)+' ('+pct+'% utilizado)':'')+'</p><p>Gerado em: '+dh+'</p></div>'+
+    '<div class="g3">'+
+    '<div class="gc"><div class="gl">Total Geral</div><div class="gv verde">R$ '+fmt(c.total)+'</div></div>'+
+    '<div class="gc"><div class="gl">Material</div><div class="gv azul">R$ '+fmt(c.tM)+'</div></div>'+
+    '<div class="gc"><div class="gl">Mão de Obra</div><div class="gv roxo">R$ '+fmt(c.tP)+'</div></div>'+
+    '<div class="gc"><div class="gl">✅ Pago Material</div><div class="gv verde">R$ '+fmt(c.pM)+'</div></div>'+
+    '<div class="gc"><div class="gl">🔴 Em Aberto</div><div class="gv verm">R$ '+fmt(c.aM)+'</div></div>'+
+    '<div class="gc"><div class="gl">🟡 A Vencer</div><div class="gv amar">R$ '+fmt(c.vM)+'</div></div>'+
+    '</div>'+
+    '<div class="sec">📦 Compras de Material</div>'+
+    '<div class="tw"><table><thead><tr><th>#</th><th>Data</th><th>Descrição</th><th>Fornecedor</th><th>Forma</th><th>Status</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+mRows+'</tbody><tfoot><tr><td colspan="6"><b>TOTAL MATERIAL</b></td><td style="text-align:right"><b>R$ '+fmt(c.tM)+'</b></td></tr></tfoot></table></div>'+
+    '<div class="sec">👷 Pagamentos de Mão de Obra por Prestador</div>'+
+    '<div class="tw"><table><thead><tr><th>Data</th><th colspan="2">Descrição</th><th>Forma Pagt.</th><th>Status</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+mdo+'</tbody><tfoot><tr><td colspan="5"><b>TOTAL MÃO DE OBRA</b></td><td style="text-align:right"><b>R$ '+fmt(c.tP)+'</b></td></tr></tfoot></table></div>'+
+    '<div class="foot">GSA Construções — '+obra.nome+' | Gerado em '+dh+'</div><script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()" onerror="console.warn('GAPI offline')"></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="gsiLoaded()" onerror="console.warn('GSI offline')"></script>
+</body></html>';
+
+  var w2=window.open('','_blank');
+  if(w2){w2.document.write(html);w2.document.close();setTimeout(function(){w2.print();},800);}
+  else toast('Permita popups');
+}
+
+// ===== HELPERS =====
+function renderEReabrir(oi){
+  // Salva posição atual do scroll
+  var scrollY=window.scrollY||window.pageYOffset;
+  render();
+  // Reabre o body da obra
+  var el=document.getElementById('ob-body-'+oi);
+  if(el)el.style.display='block';
+  // Restaura exatamente a mesma posição de scroll
+  setTimeout(function(){window.scrollTo({top:scrollY,behavior:'instant'});},10);
+}
+
+function fecharModal(id){
+  document.getElementById(id).classList.remove('on');
+  // Limpar campos
+  var inputs=document.querySelectorAll('#'+id+' input, #'+id+' textarea');
+  inputs.forEach(function(el){if(el.type!=='submit'&&el.type!=='button')el.value='';});
+}
+
+function preencherSelectObras(){
+  var sel=document.getElementById('pag-obra');
+  sel.innerHTML='';
+  DADOS.obras.forEach(function(o){
+    var opt=document.createElement('option');
+    opt.value=o.id; opt.textContent=o.nome;
+    sel.appendChild(opt);
+  });
+  // Pré-selecionar obra do contexto
+  if(CTX.obraIdx>=0&&DADOS.obras[CTX.obraIdx]){
+    sel.value=DADOS.obras[CTX.obraIdx].id;
+  }
+}
+
+// ===== BACKUP =====
+function expJson(){
+  var blob=new Blob([JSON.stringify({versao:2,dados:DADOS},null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='backup_obras_'+hoje()+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('📦 Backup exportado!');
+}
+function impJson(inp){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      if(d.dados){DADOS=d.dados;salvar();render();fecharModal('modal-bkp');toast('✅ Backup restaurado!');}
+      else toast('❌ Arquivo inválido');
+    }catch(er){toast('❌ Arquivo inválido');}
+  };
+  r.readAsText(f);
+}
+
+// ===== EVENTOS =====
+function handleAcao(e){
+  var el=e.target;
+  while(el&&el!==document.body){
+    var a=el.getAttribute('data-action');
+    if(a){
+      e.preventDefault();e.stopPropagation();
+      var p=el.getAttribute('data-p')||'';
+      var p2=el.getAttribute('data-p2')||'';
+      switch(a){
+        case 'login': login(); break;
+        case 'tab': TAB=+p; render(); break;
+        case 'toggle-dark': toggleDark(); break;
+        case 'toggle-obra': toggleObra(+p); break;
+        case 'toggle-prest': togglePrest(+p); break;
+        case 'nova-obra': document.getElementById('modal-obra').classList.add('on'); break;
+        case 'fechar-obra': fecharModal('modal-obra'); break;
+        case 'salvar-obra': salvarObra(); break;
+        case 'del-obra': delObra(+p); break;
+        case 'edit-obra': abrirEditObra(+p); break;
+        case 'fechar-edit-obra': fecharModal('modal-edit-obra'); break;
+        case 'salvar-edit-obra': salvarEditObra(); break;
+        case 'novo-mat': CTX.obraIdx=+p; document.getElementById('m-data').value=hoje(); document.getElementById('m-parcelado').checked=false; document.getElementById('parcelas-wrap').style.display='none'; document.getElementById('parcelas-lista').innerHTML=''; document.getElementById('modal-mat').classList.add('on'); break;
+        case 'fechar-mat': fecharModal('modal-mat'); document.getElementById('m-parcelado').checked=false; document.getElementById('parcelas-wrap').style.display='none'; break;
+        case 'salvar-mat': salvarMat(); break;
+        case 'del-mat': delMat(+p,+p2); break;
+        case 'edit-mat': abrirEditMat(+p,+p2); break;
+        case 'fechar-edit-mat': fecharModal('modal-edit-mat'); break;
+        case 'salvar-edit-mat': salvarEditMat(); break;
+        case 'toggle-parcela': toggleParcela(+p,+p2,+(el.getAttribute('data-p3')||'0')); break;
+        case 'novo-pag-obra':
+          CTX.obraIdx=+p; CTX.prestId=0;
+          document.getElementById('pag-data').value=hoje();
+          document.getElementById('pag-prest-info').innerHTML='Selecione o prestador abaixo';
+          // Adicionar select de prestador
+          var selPrest=document.getElementById('pag-prest-info');
+          var selHTML='<select id="pag-prest-sel" style="width:100%;padding:8px;border:1.5px solid var(--borda);border-radius:7px;font-size:13px;background:var(--inp);color:var(--txt);margin-top:5px">';
+          DADOS.prestadores.forEach(function(pr){selHTML+='<option value="'+pr.id+'">'+pr.nome+'</option>';});
+          selHTML+='</select>';
+          selPrest.innerHTML=selHTML;
+          preencherSelectObras();
+          document.getElementById('modal-pag').classList.add('on');
+          break;
+        case 'novo-pag-prest':
+          var prest=DADOS.prestadores[+p];
+          CTX.prestId=prest.id; CTX.obraIdx=-1;
+          document.getElementById('pag-data').value=hoje();
+          document.getElementById('pag-prest-info').innerHTML='👷 '+prest.nome+' <span style="font-size:10px;font-weight:400;opacity:.7">'+prest.tipo+'</span>';
+          preencherSelectObras();
+          document.getElementById('modal-pag').classList.add('on');
+          break;
+        case 'fechar-pag': fecharModal('modal-pag'); break;
+        case 'salvar-pag':
+          // Pegar prestId do select se vier de novo-pag-obra
+          var selEl=document.getElementById('pag-prest-sel');
+          if(selEl) CTX.prestId=parseInt(selEl.value)||0;
+          salvarPag();
+          break;
+        case 'del-pag': delPag(+p,+p2); break;
+        case 'del-pag-prest': delPag(+p,+p2); break;
+        case 'edit-pag': abrirEditPag(+p,+p2); break;
+        case 'edit-pag-prest': abrirEditPag(+p,+p2); break;
+        case 'fechar-edit-pag': fecharModal('modal-edit-pag'); break;
+        case 'salvar-edit-pag': salvarEditPag(); break;
+        case 'edit-prest': abrirEditPrest(+p); break;
+        case 'fechar-edit-prest': fecharModal('modal-edit-prest'); break;
+        case 'salvar-edit-prest': salvarEditPrest(); break;
+        case 'novo-prest': document.getElementById('modal-prest').classList.add('on'); break;
+        case 'fechar-prest': fecharModal('modal-prest'); break;
+        case 'salvar-prest': salvarPrest(); break;
+        case 'del-prest': delPrest(+p); break;
+        case 'pdf-obra': gerarPdf(+p); break;
+        case 'abrir-bkp': document.getElementById('modal-bkp').classList.add('on'); break;
+        case 'abrir-drive': abrirDrive(); break;
+        case 'fechar-drive': fecharModal('modal-drive'); break;
+        case 'conectar-drive': fecharModal('modal-drive'); conectarDrive(); break;
+        case 'desconectar-drive': desconectarDrive(); break;
+        case 'sincronizar-drive-agora': fecharModal('modal-drive'); toast('🔄 Sincronizando...'); sincronizarDrive(); break;
+        case 'abrir-config-drive': abrirConfigDrive(); break;
+        case 'fechar-config-drive': fecharModal('modal-config-drive'); break;
+        case 'salvar-config-drive': salvarConfigDriveAction(); break;
+        case 'fechar-bkp': fecharModal('modal-bkp'); break;
+        case 'exp-json': expJson(); break;
+        case 'imp-json': document.getElementById('inp-json').click(); break;
+        case 'ir-obra': TAB=0; render(); setTimeout(function(){toggleObra(+p);window.scrollTo({top:0,behavior:'smooth'});},100); break;
+      }
+      return;
+    }
+    if(el.classList&&el.classList.contains('mov')&&el.classList.contains('on')&&el===e.target){el.classList.remove('on');return;}
+    el=el.parentElement;
+  }
+}
+document.addEventListener('touchend',function(e){handleAcao(e);},{passive:false});
+document.addEventListener('click',function(e){handleAcao(e);});
+document.getElementById('isenha').addEventListener('keydown',function(e){if(e.key==='Enter')login();});
+document.getElementById('inp-json').addEventListener('change',function(){if(this.files[0])impJson(this);});
+
+
+// ============================================================
+// GOOGLE DRIVE — GSA OBRAS
+// ============================================================
+var DRIVE = {
+  CLIENT_ID: '',
+  SCOPE: 'https://www.googleapis.com/auth/drive.appdata',
+  ARQ_DADOS: 'gsa_obras_v2.json',
+  token: null, email: null, fileId: null,
+  sincronizando: false, gapiOk: false, gsiOk: false,
+  tokenClient: null
+};
+var DRIVE_CONFIG_KEY = 'gsa_obras_drive_config';
+
+function carregarConfigDrive(){
+  try{ var c=localStorage.getItem(DRIVE_CONFIG_KEY); if(c){ var o=JSON.parse(c); DRIVE.CLIENT_ID=o.clientId||''; } }catch(e){}
+}
+function salvarConfigDriveLocal(cid){
+  try{ localStorage.setItem(DRIVE_CONFIG_KEY, JSON.stringify({clientId:cid})); }catch(e){}
+  DRIVE.CLIENT_ID = cid;
+}
+function temClientId(){ return !!DRIVE.CLIENT_ID; }
+
+// Callbacks dos scripts Google
+function gapiLoaded(){
+  gapi.load('client', function(){
+    gapi.client.init({}).then(function(){
+      DRIVE.gapiOk = true; tentarIniciarDrive();
+    });
+  });
+}
+function gsiLoaded(){ DRIVE.gsiOk = true; tentarIniciarDrive(); }
+
+function tentarIniciarDrive(){
+  if(!DRIVE.gapiOk || !DRIVE.gsiOk || !temClientId()) return;
+  DRIVE.tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: DRIVE.CLIENT_ID,
+    scope: DRIVE.SCOPE,
+    callback: function(resp){
+      if(resp.error){ toast('❌ Drive: '+resp.error); atualizarBadgeDrive(false); return; }
+      DRIVE.token = resp.access_token;
+      obterEmailDrive().then(function(){
+        atualizarBadgeDrive(true);
+        sincronizarDrive();
+      });
+    }
+  });
+  // Tenta reconectar silenciosamente
+  DRIVE.tokenClient.requestAccessToken({prompt:''});
+}
+
+async function obterEmailDrive(){
+  try{
+    var r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+      {headers:{Authorization:'Bearer '+DRIVE.token}});
+    var d = await r.json();
+    DRIVE.email = d.email||'';
+  }catch(e){ DRIVE.email=''; }
+}
+
+function atualizarBadgeDrive(ok){
+  var b = document.getElementById('drive-badge');
+  if(!b) return;
+  if(DRIVE.sincronizando){
+    b.textContent='☁️ Sync...';
+    b.style.background='rgba(66,133,244,0.4)';
+    b.style.color='#8ab4f8';
+  } else if(ok && DRIVE.token){
+    b.textContent='☁️ '+(DRIVE.email ? DRIVE.email.split('@')[0] : '✓');
+    b.style.background='rgba(66,133,244,0.25)';
+    b.style.color='#8ab4f8';
+  } else {
+    b.textContent='☁️ Drive';
+    b.style.background='rgba(255,255,255,0.15)';
+    b.style.color='#fff';
+  }
+}
+
+// ---- Operações no Drive ----
+async function driveReq(method, url, body, ct){
+  var h = {Authorization:'Bearer '+DRIVE.token};
+  if(ct) h['Content-Type'] = ct;
+  var r = await fetch(url, {method:method, headers:h, body:body||undefined});
+  if(r.status===401){ DRIVE.token=null; atualizarBadgeDrive(false); }
+  return r;
+}
+
+async function buscarArqDrive(nome){
+  var r = await driveReq('GET',
+    'https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22'+encodeURIComponent(nome)+'%22&fields=files(id,name,modifiedTime)');
+  var d = await r.json();
+  return (d.files && d.files.length > 0) ? d.files[0] : null;
+}
+
+async function lerArqDrive(id){
+  var r = await driveReq('GET','https://www.googleapis.com/drive/v3/files/'+id+'?alt=media');
+  return await r.json();
+}
+
+async function salvarArqDrive(nome, fid, dados){
+  var json = JSON.stringify(dados, null, 2);
+  var bd = 'bnd_obras_'+Date.now();
+  var meta = JSON.stringify({name:nome, parents: fid?undefined:['appDataFolder']});
+  var body = '--'+bd+'
+Content-Type: application/json
+
+'+meta+
+             '
+--'+bd+'
+Content-Type: application/json
+
+'+json+'
+--'+bd+'--';
+  var url = fid
+    ? 'https://www.googleapis.com/upload/drive/v3/files/'+fid+'?uploadType=multipart'
+    : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+  var r = await driveReq(fid?'PATCH':'POST', url, body, 'multipart/related; boundary='+bd);
+  var d = await r.json();
+  return d.id;
+}
+
+async function sincronizarDrive(){
+  if(!DRIVE.token || DRIVE.sincronizando) return;
+  DRIVE.sincronizando = true;
+  atualizarBadgeDrive(true);
+  try{
+    var arq = await buscarArqDrive(DRIVE.ARQ_DADOS);
+    if(arq){
+      DRIVE.fileId = arq.id;
+      var driveData = await lerArqDrive(arq.id);
+      var localTs = parseInt(localStorage.getItem('gsa_obras_sync_ts')||'0');
+      var driveTs = new Date(arq.modifiedTime).getTime();
+      if(driveTs > localTs){
+        // Drive mais recente — baixa
+        if(driveData && driveData.dados){
+          DADOS = driveData.dados;
+          if(!DADOS.obras) DADOS.obras=[];
+          if(!DADOS.prestadores) DADOS.prestadores=[];
+          salvar();
+          render();
+          toast('☁️ Dados atualizados do Drive!');
+          localStorage.setItem('gsa_obras_sync_ts', driveTs.toString());
+        }
+      } else if(localTs > driveTs){
+        // Local mais recente — envia
+        await enviarDadosDrive();
+      }
+    } else {
+      // Arquivo não existe — cria
+      await enviarDadosDrive();
+    }
+  }catch(e){
+    console.error('Drive sync error:', e);
+    toast('⚠️ Erro ao sincronizar Drive');
+  }
+  DRIVE.sincronizando = false;
+  atualizarBadgeDrive(DRIVE.token ? true : false);
+}
+
+async function enviarDadosDrive(){
+  var id = await salvarArqDrive(DRIVE.ARQ_DADOS, DRIVE.fileId, {versao:2, dados:DADOS});
+  DRIVE.fileId = id;
+  localStorage.setItem('gsa_obras_sync_ts', Date.now().toString());
+}
+
+function syncAposSalvar(){
+  if(DRIVE.token) setTimeout(sincronizarDrive, 800);
+}
+
+function conectarDrive(){
+  if(!temClientId()){ abrirConfigDrive(); return; }
+  if(!DRIVE.gapiOk || !DRIVE.gsiOk){ toast('⏳ APIs Google carregando...'); return; }
+  if(!DRIVE.tokenClient){ tentarIniciarDrive(); setTimeout(function(){ if(DRIVE.tokenClient) DRIVE.tokenClient.requestAccessToken({prompt:'consent'}); }, 1000); return; }
+  DRIVE.tokenClient.requestAccessToken({prompt:'consent'});
+}
+
+function desconectarDrive(){
+  if(DRIVE.token) try{ google.accounts.oauth2.revoke(DRIVE.token, function(){}); }catch(e){}
+  DRIVE.token = null; DRIVE.email = null; DRIVE.fileId = null;
+  atualizarBadgeDrive(false);
+  toast('☁️ Drive desconectado');
+  fecharModal('modal-drive');
+}
+
+function abrirDrive(){
+  var b = document.getElementById('drive-modal-body');
+  var h = '';
+  if(!temClientId()){
+    h+='<div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:8px;padding:12px;margin-bottom:13px;font-size:13px;color:#0d47a1">☁️ Configure o Google Drive para sincronizar automaticamente.</div>';
+    h+='<button class="bsv" data-action="abrir-config-drive" style="width:100%;margin-bottom:9px">⚙️ Configurar agora</button>';
+  } else if(!DRIVE.token){
+    h+='<div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:8px;padding:12px;margin-bottom:13px;font-size:13px;color:#0d47a1">Client ID configurado. Entre com sua conta Google para ativar.</div>';
+    h+='<button class="bsv" data-action="conectar-drive" style="width:100%;margin-bottom:9px">🔑 Entrar com Google</button>';
+    h+='<button class="bcl" data-action="abrir-config-drive" style="width:100%;margin-bottom:9px">⚙️ Alterar Client ID</button>';
+  } else {
+    h+='<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:12px;margin-bottom:13px;font-size:13px;color:#1b5e20">✅ Conectado como<br><strong>'+DRIVE.email+'</strong></div>';
+    h+='<button class="bsv" data-action="sincronizar-drive-agora" style="width:100%;margin-bottom:9px">🔄 Sincronizar agora</button>';
+    h+='<button class="bcl" data-action="desconectar-drive" style="width:100%;margin-bottom:9px">🚪 Desconectar</button>';
+  }
+  h+='<button class="bcl" data-action="fechar-drive" style="width:100%">Fechar</button>';
+  b.innerHTML = h;
+  document.getElementById('modal-drive').classList.add('on');
+}
+
+function abrirConfigDrive(){
+  fecharModal('modal-drive');
+  document.getElementById('inp-client-id').value = DRIVE.CLIENT_ID||'';
+  setTimeout(function(){ document.getElementById('modal-config-drive').classList.add('on'); }, 80);
+}
+
+function salvarConfigDriveAction(){
+  var cid = document.getElementById('inp-client-id').value.trim();
+  if(!cid || !cid.includes('.apps.googleusercontent.com')){ toast('❌ Client ID inválido'); return; }
+  salvarConfigDriveLocal(cid);
+  fecharModal('modal-config-drive');
+  toast('✅ Salvo! Recarregando...');
+  setTimeout(function(){ location.reload(); }, 1500);
+}
+
+// ===== Override salvar para sincronizar com Drive =====
+var _salvarOriginal = salvar;
+salvar = function(){
+  _salvarOriginal();
+  localStorage.setItem('gsa_obras_sync_ts', Date.now().toString());
+  syncAposSalvar();
+};
+
+// ===== BOOT =====
+initDark();
+carregarConfigDrive();
+if(localStorage.getItem('gsa_obras_auth2')==='1'){
+  document.getElementById('tela-login').className='oculto';
+  document.getElementById('app').className='on';
+  carregar(); render();
+  if(temClientId()) setTimeout(tentarIniciarDrive, 500);
+}
+</script>
+<script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()" onerror="console.warn('GAPI offline')"></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="gsiLoaded()" onerror="console.warn('GSI offline')"></script>
+</body>
+</html>
